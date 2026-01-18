@@ -18,11 +18,18 @@ add_subdirectory(lib/pico_hdmi)
 # Main executable
 add_executable(superpico-digital
     src/main.c
+    src/osd/osd.c
+    src/freq_counter.c
+)
+
+target_include_directories(superpico-digital PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
 target_link_libraries(superpico-digital
     pico_stdlib
     pico_multicore
+    hardware_pio
     pico_hdmi
 )
 
