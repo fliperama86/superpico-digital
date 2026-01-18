@@ -50,40 +50,33 @@ void __scratch_x("") scanline_callback(uint32_t v_scanline, uint32_t active_line
     (void)v_scanline;
 
     // 2x Vertical Scaling: Every 240p line is shown twice to reach 480p
-    // active_line is 0..479. source_line is 0..239.
     uint32_t source_line = active_line / 2;
 
     // Bounds checking
     if (source_line >= VIDEO_HEIGHT) {
-        memset(dst, 0, FRAME_WIDTH * 2); // Black output
+        memset(dst, 0, FRAME_WIDTH * 2); 
         return;
     }
 
-    // Read directly from the pre-filled framebuffer
     const uint16_t *src = g_framebuffer[source_line];
 
-    // Check if OSD is visible AND this line intersects OSD box
-    // OSD coordinates are in 240p space (source_line), same as video
-    if (osd_visible && source_line >= OSD_BOX_Y && source_line < OSD_BOX_Y + OSD_BOX_H) {
-        // OSD line within the OSD box
+    // Fast path: no OSD on this line, full video doubling
+    if (!osd_visible) {
+        double_pixels_fast(dst, src, VIDEO_WIDTH);
+        return;
+    }
+
+    // OSD logic (only if visible)
+    if (source_line >= OSD_BOX_Y && source_line < OSD_BOX_Y + OSD_BOX_H) {
         uint32_t osd_line = source_line - OSD_BOX_Y;
         const uint16_t *osd_src = osd_framebuffer[osd_line];
 
-        // === Loop splitting: 3 regions, no per-pixel branching ===
-
-        // Region 1: Before OSD box (0 to OSD_BOX_X)
         double_pixels_fast(dst, src, OSD_BOX_X);
-
-        // Region 2: OSD box (OSD_BOX_X to OSD_BOX_X + OSD_BOX_W)
-        // OSD overlay is 1:1, so we double it to match the output scale
         double_pixels_fast(dst + OSD_BOX_X, osd_src, OSD_BOX_W);
-
-        // Region 3: After OSD box (OSD_BOX_X + OSD_BOX_W to VIDEO_WIDTH)
         double_pixels_fast(dst + OSD_BOX_X + OSD_BOX_W,
                           src + OSD_BOX_X + OSD_BOX_W,
                           VIDEO_WIDTH - OSD_BOX_X - OSD_BOX_W);
     } else {
-        // Fast path: no OSD on this line, full video doubling
         double_pixels_fast(dst, src, VIDEO_WIDTH);
     }
 }

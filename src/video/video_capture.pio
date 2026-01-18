@@ -1,0 +1,58 @@
+; SNES CSYNC Decoder
+; Counts PCLK edges while CSYNC is high to measure pulse width
+; IN_BASE = 22 (CSYNC)
+; JMP_PIN = 22 (CSYNC)
+; PCLK = 20 (Absolute GPIO 20)
+
+.program snes_sync
+
+public entry_point:
+    wait 1 pin 0               ; Wait for CSYNC High
+    mov x, !null                ; Initialize counter (0xFFFFFFFF)
+count_loop:
+    wait 0 gpio 20             ; Wait for PCLK Low (Absolute GP20)
+    wait 1 gpio 20             ; Wait for PCLK High (Absolute GP20)
+    jmp x-- check_pin           ; Decrement X. If 0, fall through (Timeout)
+    
+    ; Timeout (CSYNC stuck High for too long)
+    mov isr, !null              ; Push 0xFFFFFFFF
+    push noblock
+    jmp entry_point
+
+check_pin:
+    jmp pin count_loop          ; If CSYNC is still High, keep counting
+
+    ; CSYNC went Low - push count
+    mov isr, !x
+    push noblock
+    jmp entry_point
+
+
+; SNES Pixel Capture
+; IN_BASE = 20 (GP20)
+; Bit 0: GP20 (PCLK)
+; Bit 1: GP21 (R0)
+; Bit 2: GP22 (CSYNC)
+
+.program snes_pixel_capture
+
+    ; One-time initialization: C code will push (SNES_H_TOTAL - 1)
+    pull block
+    mov y, osr
+
+    ; Wait for trigger signal from C code (IRQ 4) at start of frame
+    wait 1 irq 4
+
+.wrap_target
+    ; 1. Sync to line start (CSYNC GP22 is at index 2 from IN_BASE=GP20)
+    wait 0 pin 2               ; Wait for CSYNC LOW
+    wait 1 pin 2               ; Wait for CSYNC HIGH
+
+    ; 2. Sample SNES_H_TOTAL pixels
+    mov x, y                   ; Reset pixel counter
+pixel_loop:
+    wait 0 pin 0               ; Wait for PCLK LOW
+    wait 1 pin 0               ; Wait for PCLK HIGH (rising edge)
+    in pins, 3                 ; Sample GP20-22 (PCLK, R0, CSYNC)
+    jmp x-- pixel_loop         ; Loop until line complete
+.wrap
