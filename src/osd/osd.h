@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 // OSD box dimensions (in 640x480 space)
-#define OSD_BOX_X 200       // Start X position (centered)
-#define OSD_BOX_Y 200       // Start Y position (centered)
+#define OSD_BOX_X 40        // Start X position (centered: (320-240)/2)
+#define OSD_BOX_Y 80        // Start Y position (centered: (240-80)/2)
 #define OSD_BOX_W 240       // Width in pixels (must be multiple of 8)
 #define OSD_BOX_H 80        // Height in pixels
 

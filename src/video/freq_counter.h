@@ -3,11 +3,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
-
-// Pin definitions for frequency measurement
-#define PIN_FREQ_PCLK  20
-#define PIN_FREQ_R0    21
-#define PIN_FREQ_CSYNC 22
+#include "../snes_pins.h"
 
 // Measured frequencies (updated by freq_counter_update)
 extern volatile uint32_t freq_pclk_hz;

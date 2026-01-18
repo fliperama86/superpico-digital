@@ -1,41 +1,30 @@
 cmake_minimum_required(VERSION 3.13)
 
-# Initialize Pico SDK (must be before project())
-set(PICO_PLATFORM rp2350)
-set(PICO_BOARD pico2)
+# Set PICO_SDK_PATH if not set in environment
+if (NOT PICO_SDK_PATH)
+    set(PICO_SDK_PATH $ENV{PICO_SDK_PATH})
+endif()
 
+# Set board type before SDK import (override with -DPICO_BOARD=pico for Pico 1)
+if(NOT DEFINED PICO_BOARD)
+    set(PICO_BOARD pico2)
+endif()
+
+# For SDK 2.x, ensure the platform is set before project() to help toolchain selection
+if(PICO_BOARD MATCHES "rp2350")
+    set(PICO_PLATFORM rp2350 CACHE STRING "Pico platform" FORCE)
+endif()
+
+# Initialize the SDK
 include(pico_sdk_import.cmake)
 
-project(superpico-digital C CXX ASM)
+project(superpico_digital C CXX ASM)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_CXX_STANDARD 17)
 
+# Initialize the Raspberry Pi Pico SDK
 pico_sdk_init()
 
-# Add PicoHDMI library
-add_subdirectory(lib/pico_hdmi)
-
-# Main executable
-add_executable(superpico-digital
-    src/main.c
-    src/osd/osd.c
-    src/freq_counter.c
-)
-
-target_include_directories(superpico-digital PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-
-target_link_libraries(superpico-digital
-    pico_stdlib
-    pico_multicore
-    hardware_pio
-    pico_hdmi
-)
-
-# Create UF2 output
-pico_add_extra_outputs(superpico-digital)
-
-# Enable USB output, disable UART
-pico_enable_stdio_usb(superpico-digital 1)
-pico_enable_stdio_uart(superpico-digital 0)
+# Add the src directory
+add_subdirectory(src)
