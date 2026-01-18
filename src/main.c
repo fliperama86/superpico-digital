@@ -30,6 +30,12 @@
 #define FRAME_WIDTH 640
 #define FRAME_HEIGHT 480
 
+#define VIDEO_WIDTH 320
+#define VIDEO_HEIGHT 240
+
+// Virtual video buffer (simulating a captured line)
+static uint16_t scanline_buffer[VIDEO_WIDTH];
+
 // Background colors (RGB565)
 #define BG_COLOR 0x0010  // Dark blue
 
@@ -176,11 +182,27 @@ static void update_osd_frequencies(void)
 // Scanline Callback (runs on Core 1)
 // ============================================================================
 
+/**
+ * Fast 2x pixel doubling: reads 2 pixels, writes 2 doubled words
+ * Processes 32-bits at a time for efficiency
+ */
+static inline void __scratch_x("")
+double_pixels_fast(uint32_t *dst, const uint16_t *src, int count) {
+    const uint32_t *src32 = (const uint32_t *)src;
+    int pairs = count / 2;
+
+    for (int i = 0; i < pairs; i++) {
+        uint32_t two = src32[i];
+        uint32_t p0 = two & 0xFFFF;
+        uint32_t p1 = two >> 16;
+        dst[i * 2] = p0 | (p0 << 16);
+        dst[i * 2 + 1] = p1 | (p1 << 16);
+    }
+}
+
 void __scratch_x("") scanline_callback(uint32_t v_scanline, uint32_t active_line, uint32_t *dst)
 {
     (void)v_scanline;
-
-    uint32_t bg = BG_COLOR | (BG_COLOR << 16);
 
     // Check if OSD is visible AND this line intersects OSD box
     if (osd_visible && active_line >= OSD_BOX_Y && active_line < OSD_BOX_Y + OSD_BOX_H) {
@@ -191,26 +213,30 @@ void __scratch_x("") scanline_callback(uint32_t v_scanline, uint32_t active_line
         // === Loop splitting: 3 regions, no per-pixel branching ===
 
         // Region 1: Before OSD box (0 to OSD_BOX_X)
-        for (int i = 0; i < OSD_BOX_X / 2; i++) {
-            dst[i] = bg;
-        }
+        // Read OSD_BOX_X/2 source pixels, write OSD_BOX_X output pixels
+        double_pixels_fast(dst, scanline_buffer, OSD_BOX_X / 2);
 
         // Region 2: OSD box (OSD_BOX_X to OSD_BOX_X + OSD_BOX_W)
         // Copy OSD pixels (already RGB565, pack as uint32_t pairs)
+        // OSD overlay is 1:1, not doubled
         const uint32_t *osd32 = (const uint32_t *)osd_src;
         for (int i = 0; i < OSD_BOX_W / 2; i++) {
             dst[OSD_BOX_X / 2 + i] = osd32[i];
         }
 
         // Region 3: After OSD box (OSD_BOX_X + OSD_BOX_W to FRAME_WIDTH)
-        for (int i = (OSD_BOX_X + OSD_BOX_W) / 2; i < FRAME_WIDTH / 2; i++) {
-            dst[i] = bg;
-        }
+        // Offset src by: OSD_BOX_X/2 + OSD_BOX_W/2 (input pixels skipped under OSD)
+        // Offset dst by: (OSD_BOX_X + OSD_BOX_W)/2 (output uint32 indices)
+        int src_offset = (OSD_BOX_X + OSD_BOX_W) / 2;
+        int dst_offset = (OSD_BOX_X + OSD_BOX_W) / 2;
+        int remaining_out_width = FRAME_WIDTH - OSD_BOX_X - OSD_BOX_W;
+
+        double_pixels_fast(dst + dst_offset, 
+                           scanline_buffer + src_offset, 
+                           remaining_out_width / 2);
     } else {
-        // Fast path: no OSD on this line, full background
-        for (int i = 0; i < FRAME_WIDTH / 2; i++) {
-            dst[i] = bg;
-        }
+        // Fast path: no OSD on this line, full video doubling
+        double_pixels_fast(dst, scanline_buffer, VIDEO_WIDTH);
     }
 }
 
@@ -235,6 +261,15 @@ int main(void)
     init_sine_table();
     note_frames_remaining = melody[0].duration;
     phase_increment = (uint32_t)(((uint64_t)melody[0].freq << 32) / AUDIO_SAMPLE_RATE);
+
+    // Initialize scanline buffer with a gradient/pattern
+    // 320 pixels: Red -> Green gradient
+    for (int i = 0; i < VIDEO_WIDTH; i++) {
+        uint8_t r = (i * 31) / VIDEO_WIDTH;
+        uint8_t g = 63 - ((i * 63) / VIDEO_WIDTH);
+        uint8_t b = 15;
+        scanline_buffer[i] = (r << 11) | (g << 5) | b;
+    }
 
     // Initialize OSD
     osd_init();
