@@ -1,4 +1,4 @@
-; SNES Hard Sync Capture (Stabilized)
+; SNES Hard Sync Capture (With Horizontal Offset)
 ; Optimized for RP2350
 ; GP20: PCLK, GP21: R0, GP26: HBLANK, GP27: VBLANK
 
@@ -15,19 +15,23 @@
 line_loop:
     ; 2. Wait for Active Line Start (HBLANK Falling Edge)
     wait 1 gpio 26             ; Wait for HBLANK HIGH
-    wait 0 gpio 26             ; Wait for HBLANK LOW (Active Start)
+    wait 0 gpio 26             ; Wait for HBLANK LOW (Active Window Starts)
     
-    ; 3. Phase Lock: Wait for one full PCLK cycle to align the loop
-    wait 1 gpio 20             ; Wait for next Rising Edge
-    wait 0 gpio 20             ; Wait for Falling Edge
-    
+    ; 3. Horizontal Offset: Skip 12 pixels to reveal the right side
+    ; SNES HBLANK usually falls slightly before the "real" active pixels.
+    set x, 11
+skip_loop:
+    wait 1 gpio 20             ; Wait for PCLK Rising
+    wait 0 gpio 20             ; Wait for Falling
+    jmp x-- skip_loop
+
     ; 4. Capture 256 pixels
     mov x, y
 pixel_loop:
     wait 1 gpio 20             ; Wait for PCLK Rising Edge
-    nop [2]                    ; Stability delay (Setup time)
+    nop [2]                    ; Stability delay
     in pins, 2                 ; Sample [GP21:R0, GP20:PCLK]
-    wait 0 gpio 20             ; Wait for PCLK Falling Edge (Ensures 1:1 sync)
+    wait 0 gpio 20             ; Wait for Falling Edge
     jmp x-- pixel_loop         
 
     ; 5. Go back to wait for the next HBLANK
