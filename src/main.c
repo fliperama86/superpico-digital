@@ -9,11 +9,20 @@
 #include "video/video_pipeline.h"
 #include "video/video_capture.h"
 #include "video/snes_timing.h"
+#include "video/video_config.h"
+#include "config.h"
+
+#if ENABLE_AUDIO
+#include "audio/audio_pipeline.h"
+#endif
 
 #include <stdio.h>
 
 void __scratch_x("") vsync_callback(void) {
     line_ring_output_vsync();
+#if ENABLE_AUDIO
+    audio_pipeline_step();
+#endif
 }
 
 int main(void)
@@ -37,11 +46,21 @@ int main(void)
     printf("Init video pipeline...\n");
     video_pipeline_init();
 
+#if ENABLE_AUDIO
+    printf("Init audio pipeline...\n");
+    audio_pipeline_init();
+#endif
+
     printf("Init HDMI output...\n");
     hstx_di_queue_init();
     video_output_init(FRAME_WIDTH, FRAME_HEIGHT);
     video_output_set_scanline_callback(scanline_callback);
     video_output_set_vsync_callback(vsync_callback);
+
+#if ENABLE_AUDIO
+    // Register audio as a background task on Core 1
+    video_output_set_background_task(audio_pipeline_process);
+#endif
 
     printf("Launch Core 1 (HDMI)...\n");
     multicore_launch_core1(video_output_core1_run);
