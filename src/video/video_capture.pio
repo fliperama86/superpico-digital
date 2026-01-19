@@ -1,4 +1,4 @@
-; SNES Hard Sync Capture (Direct Trigger)
+; SNES Hard Sync Capture (Stabilized)
 ; Optimized for RP2350
 ; GP20: PCLK, GP21: R0, GP26: HBLANK, GP27: VBLANK
 
@@ -9,23 +9,27 @@
     mov y, osr
 
 .wrap_target
-    ; 1. Wait for C code to give the signal (Top of Frame)
+    ; 1. Wait for C code trigger (Top of Frame)
     wait 1 irq 4
 
-    ; 2. Capture loop for lines
 line_loop:
-    ; 3. Wait for Active Line (HBLANK Falling Edge)
+    ; 2. Wait for Active Line Start (HBLANK Falling Edge)
     wait 1 gpio 26             ; Wait for HBLANK HIGH
     wait 0 gpio 26             ; Wait for HBLANK LOW (Active Start)
+    
+    ; 3. Phase Lock: Wait for one full PCLK cycle to align the loop
+    wait 1 gpio 20             ; Wait for next Rising Edge
+    wait 0 gpio 20             ; Wait for Falling Edge
     
     ; 4. Capture 256 pixels
     mov x, y
 pixel_loop:
-    wait 0 gpio 20             ; Wait for PCLK LOW
-    wait 1 gpio 20             ; Wait for PCLK HIGH
+    wait 1 gpio 20             ; Wait for PCLK Rising Edge
+    nop [2]                    ; Stability delay (Setup time)
     in pins, 2                 ; Sample [GP21:R0, GP20:PCLK]
+    wait 0 gpio 20             ; Wait for PCLK Falling Edge (Ensures 1:1 sync)
     jmp x-- pixel_loop         
 
-    ; 5. Continue to next line until C code resets us for next frame
+    ; 5. Go back to wait for the next HBLANK
     jmp line_loop
 .wrap
