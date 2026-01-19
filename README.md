@@ -1,10 +1,10 @@
-# superpico-digital
+# SuperPico Digital
 
 Digital-to-digital HDMI mod for 2-chip SNES consoles using the Raspberry Pi Pico 2 (RP2350).
 
 ## Overview
 
-`superpico-digital` captures native 15-bit digital RGB directly from the S-PPU2's TST pins - bypassing the console's analog video path entirely—and outputs clean HDMI via the RP2350's hardware HSTX peripheral. This approach eliminates the blur inherent in non - 1CHIP SNES consoles and provides a rock-solid, jitter-free image.
+SuperPico Digital captures native 15-bit digital RGB directly from the S-PPU2's TST pins - bypassing the console's analog video path entirely - and outputs clean HDMI via the RP2350's hardware HSTX peripheral. This approach eliminates the blur inherent in non - 1CHIP SNES consoles and provides a rock-solid, jitter-free image.
 
 ## Key Features
 
