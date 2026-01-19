@@ -1,36 +1,16 @@
 #include "video_pipeline.h"
+#include "snes_timing.h"
 #include "pico_hdmi/video_output.h"
-#include "osd/osd.h"
 #include "pico/stdlib.h"
 #include <string.h>
 
-// Full framebuffer (320x240 RGB565)
-// Aligned for potential DMA usage (though currently accessed via CPU in ISR)
-uint16_t g_framebuffer[VIDEO_HEIGHT][VIDEO_WIDTH] __attribute__((aligned(64)));
+line_ring_t g_line_ring __attribute__((aligned(64)));
 
 void video_pipeline_init(void) {
-    // Initialize framebuffer with a white grid on black background
-    for (int y = 0; y < VIDEO_HEIGHT; y++) {
-        for (int x = 0; x < VIDEO_WIDTH; x++) {
-            uint16_t color = 0x0000; // Black
-
-            // Draw grid lines every 32 pixels
-            // Use (x % 32 == 0) || (y % 32 == 0) for grid
-            // Also draw a border
-            if (x == 0 || x == VIDEO_WIDTH - 1 || y == 0 || y == VIDEO_HEIGHT - 1 ||
-                (x % 32) == 0 || (y % 32) == 0) {
-                color = 0xFFFF; // White
-            }
-
-            g_framebuffer[y][x] = color;
-        }
-    }
+    memset(&g_line_ring, 0, sizeof(g_line_ring));
 }
 
-/**
- * Fast 2x pixel doubling: reads 2 pixels, writes 2 doubled words
- * Processes 32-bits at a time for efficiency
- */
+// Fast 2x pixel doubling
 static inline void __scratch_x("")
 double_pixels_fast(uint32_t *dst, const uint16_t *src, int count) {
     const uint32_t *src32 = (const uint32_t *)src;
@@ -49,34 +29,34 @@ void __scratch_x("") scanline_callback(uint32_t v_scanline, uint32_t active_line
 {
     (void)v_scanline;
 
-    // 2x Vertical Scaling: Every 240p line is shown twice to reach 480p
+    // 2x vertical scaling: 240 source lines -> 480 output lines
     uint32_t source_line = active_line / 2;
 
-    // Bounds checking
-    if (source_line >= VIDEO_HEIGHT) {
-        memset(dst, 0, FRAME_WIDTH * 2); 
+    if (source_line >= FRAME_HEIGHT / 2) {
+        memset(dst, 0, MODE_H_ACTIVE_PIXELS * 2);
         return;
     }
 
-    const uint16_t *src = g_framebuffer[source_line];
-
-    // Fast path: no OSD on this line, full video doubling
-    if (!osd_visible) {
-        double_pixels_fast(dst, src, VIDEO_WIDTH);
+    // Centering if needed (SNES is 224 lines, we show 240)
+    if (source_line < V_OFFSET || source_line >= V_OFFSET + SNES_V_ACTIVE) {
+        memset(dst, 0, MODE_H_ACTIVE_PIXELS * 2);
         return;
     }
 
-    // OSD logic (only if visible)
-    if (source_line >= OSD_BOX_Y && source_line < OSD_BOX_Y + OSD_BOX_H) {
-        uint32_t osd_line = source_line - OSD_BOX_Y;
-        const uint16_t *osd_src = osd_framebuffer[osd_line];
+    uint16_t snes_line = source_line - V_OFFSET;
 
-        double_pixels_fast(dst, src, OSD_BOX_X);
-        double_pixels_fast(dst + OSD_BOX_X, osd_src, OSD_BOX_W);
-        double_pixels_fast(dst + OSD_BOX_X + OSD_BOX_W,
-                          src + OSD_BOX_X + OSD_BOX_W,
-                          VIDEO_WIDTH - OSD_BOX_X - OSD_BOX_W);
-    } else {
-        double_pixels_fast(dst, src, VIDEO_WIDTH);
+    if (!line_ring_ready(snes_line)) {
+        // Show very dim gray if not ready to distinguish from no-signal
+        uint32_t gray32 = 0x08410841; 
+        for(int i=0; i<MODE_H_ACTIVE_PIXELS/2; i++) dst[i] = gray32;
+        return;
     }
+
+    const uint16_t *src = line_ring_read_ptr(snes_line);
+    
+    // Horizontal centering: (640 - (256*2)) / 2 = 64 pixels left/right
+    // 64 pixels = 32 uint32 pairs
+    memset(dst, 0, 64 * 2);
+    double_pixels_fast(dst + 32, src, SNES_H_ACTIVE);
+    memset(dst + 32 + SNES_H_ACTIVE, 0, 64 * 2);
 }

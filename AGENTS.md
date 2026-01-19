@@ -4,6 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 superpico-digital is a digital-to-digital HDMI mod for 2-chip SNES consoles using the Raspberry Pi Pico 2 (RP2350). It captures native 15-bit digital RGB directly from the S-PPU2's TST pins—bypassing the console's analog video path entirely—and outputs clean HDMI via the RP2350's hardware HSTX peripheral. This approach eliminates the blur inherent in non-1CHIP SNES analog output.
 
+## DONT's
+- DO NOT modify the content on the lib folder
+
 ## Build Commands
 
 ```bash
