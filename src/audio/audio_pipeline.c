@@ -3,6 +3,7 @@
 #include "video/video_config.h"
 
 #if ENABLE_AUDIO
+#include "melodies.h"
 #include "pico/stdlib.h"
 #include "pico_hdmi/hstx_data_island_queue.h"
 #include "pico_hdmi/hstx_packet.h"
@@ -18,48 +19,9 @@ static uint32_t audio_phase = 0;
 static uint32_t phase_increment = 0;
 static int audio_frame_counter = 0;
 
-typedef struct {
-  uint16_t freq;
-  uint8_t duration;
-} note_t;
-
-// Note frequencies (Hz)
-enum {
-  REST = 0,
-  E3 = 165,
-  G3S = 208,
-  A3 = 220,
-  B3 = 247,
-  C4 = 262,
-  D4 = 294,
-  E4 = 330,
-  F4 = 349,
-  G4 = 392,
-  G4S = 415,
-  A4 = 440,
-  B4 = 494,
-  C5 = 523,
-  D5 = 587,
-  D5S = 622,
-  E5 = 659,
-  F5 = 698,
-  G5 = 784,
-  G5S = 831,
-  A5 = 880
-};
-
-static const note_t melody[] = {
-    {E5, 18}, {B4, 9},  {C5, 9},  {D5, 18},   {C5, 9},  {B4, 9},    {A4, 18},
-    {A4, 9},  {C5, 9},  {E5, 18}, {D5, 9},    {C5, 9},  {B4, 27},   {C5, 9},
-    {D5, 18}, {E5, 18}, {C5, 18}, {A4, 18},   {A4, 18}, {REST, 18}, {D5, 27},
-    {F5, 9},  {A5, 18}, {G5, 9},  {F5, 9},    {E5, 27}, {C5, 9},    {E5, 18},
-    {D5, 9},  {C5, 9},  {B4, 18}, {B4, 9},    {C5, 9},  {D5, 18},   {E5, 18},
-    {C5, 18}, {A4, 18}, {A4, 18}, {REST, 18}, {E5, 36}, {C5, 36},   {D5, 36},
-    {B4, 36}, {C5, 36}, {A4, 36}, {G4S, 36},  {B4, 36}, {E5, 36},   {C5, 36},
-    {D5, 36}, {B4, 36}, {C5, 18}, {E5, 18},   {A5, 36}, {G5S, 72},
-};
-
-#define MELODY_LENGTH (sizeof(melody) / sizeof(melody[0]))
+static const note_t *current_melody = melody_korobeiniki;
+static uint32_t current_melody_len =
+    sizeof(melody_korobeiniki) / sizeof(melody_korobeiniki[0]);
 
 static int melody_index = 0;
 static int note_frames_remaining = 0;
@@ -82,8 +44,8 @@ static inline int16_t get_sine_sample(void) {
 void audio_pipeline_init(void) {
   init_sine_table();
   melody_index = 0;
-  note_frames_remaining = melody[0].duration;
-  uint16_t freq = melody[0].freq;
+  note_frames_remaining = current_melody[0].duration;
+  uint16_t freq = current_melody[0].freq;
   phase_increment =
       (freq > 0) ? (uint32_t)(((uint64_t)freq << 32) / AUDIO_SAMPLE_RATE) : 0;
 }
@@ -111,9 +73,9 @@ void __scratch_x("") audio_pipeline_process(void) {
 
 void audio_pipeline_step(void) {
   if (--note_frames_remaining <= 0) {
-    melody_index = (melody_index + 1) % MELODY_LENGTH;
-    note_frames_remaining = melody[melody_index].duration;
-    uint16_t freq = melody[melody_index].freq;
+    melody_index = (melody_index + 1) % current_melody_len;
+    note_frames_remaining = current_melody[melody_index].duration;
+    uint16_t freq = current_melody[melody_index].freq;
     phase_increment =
         (freq > 0) ? (uint32_t)(((uint64_t)freq << 32) / AUDIO_SAMPLE_RATE) : 0;
   }

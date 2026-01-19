@@ -12,6 +12,6 @@
 #define V_OFFSET 8
 
 // Audio Configuration
-#define ENABLE_AUDIO 1
+#define ENABLE_AUDIO 0
 
 #endif
