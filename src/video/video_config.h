@@ -11,7 +11,4 @@
 // Centering: (480 - (224*2)) / 2 = 16 lines top/bottom
 #define V_OFFSET 8
 
-// Audio Configuration
-#define ENABLE_AUDIO 0
-
 #endif
