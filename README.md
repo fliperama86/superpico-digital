@@ -19,18 +19,25 @@ SuperPico Digital captures native 15-bit digital RGB directly from the S-PPU2's 
 - **Microcontroller**: Raspberry Pi Pico 2 (RP2350).
 - **Video Signals**: Requires soldering to PPU2 pins for digital RGB, Sync, and Clock.
 
-## Wiring Reference (Basic)
+## Wiring Reference
 
-| Signal | SNES Source | Pico 2 GPIO |
-|--------|-------------|-------------|
-| **PCLK** | PPU2 Pin 27 | GP20 |
-| **R0** | PPU2 Pin 77 | GP21 |
-| **HBLANK** | PPU2 Pin 25 | GP26 |
-| **VBLANK** | PPU2 Pin 26 | GP27 |
-| **HDMI D0-D2** | - | GP14-19 |
-| **HDMI CLK** | - | GP12-13 |
+### Capture Pins (GP27-GP44 contiguous, PIO1 with GPIOBASE=16)
 
-*Note: For full 15-bit color, TST0-TST14 pins must be connected to the corresponding Pico input pins.*
+| Signal | SNES Source | Pico 2 GPIO | Capture Bit |
+|--------|-------------|-------------|-------------|
+| **VBLANK** | PPU2 Pin 26 | GP27 | 0 |
+| **PCLK** | PPU2 Pin 27 | GP28 | 1 |
+| **B4-B0** | PPU2 TST | GP29-33 | 2-6 |
+| **G4-G0** | PPU2 TST | GP34-38 | 7-11 |
+| **R4-R0** | PPU2 TST | GP39-43 | 12-16 |
+| **HBLANK** | PPU2 Pin 25 | GP44 | 17 |
+
+### HDMI Output
+
+| Signal | Pico 2 GPIO |
+|--------|-------------|
+| **HDMI D0-D2** | GP14-19 |
+| **HDMI CLK** | GP12-13 |
 
 ## Build & Flash
 
@@ -58,7 +65,7 @@ picotool load src/superpico-digital.uf2 -f && picotool reboot
 - [x] Jitter-free Pixel Capture
 - [x] HDMI Signal Stability (640x480)
 - [x] Horizontal Centering and Offset Fixes
-- [ ] Full 15-bit Color Implementation (Currently R0 proof-of-concept)
+- [x] Full 15-bit RGB555 Color (32K LUT with per-channel bit-reversal → RGB565)
 - [ ] Master Brightness Logic ($2100)
 - [ ] Mode 7 Transparency Patch
 

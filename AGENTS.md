@@ -16,8 +16,13 @@ This file provides specific guidance for AI agents (Claude Code, etc.) working o
 ### Video Capture Strategy (Hard Sync)
 The capture logic is defined in `src/video/video_capture.pio`.
 1. **Phase Locking**: The PIO waits for a full PCLK cycle (`wait 1` -> `wait 0`) after `HBLANK` falls. This eliminates horizontal jitter by ensuring the capture loop starts at the exact same phase relative to the SNES clock on every line.
-2. **Setup Delay**: A `nop [2]` (approx 24ns) is placed after the PCLK rising edge to allow the raw data bits (TST pins) to stabilize before sampling.
-3. **Horizontal Offset**: A 12-pixel skip loop is implemented in PIO to align the 256-pixel window with the actual active video area of the SNES.
+2. **Setup Delay**: Two `nop` instructions (~16ns at 126 MHz) are placed after the PCLK rising edge to allow the raw data bits (TST pins) to stabilize before sampling.
+3. **Horizontal Offset**: A 20-pixel skip loop is implemented in PIO to compensate for the PPU2 back porch and pipeline delay between HBLANK deasserting and valid pixel data appearing on the TST pins.
+
+### Pixel Conversion
+- The PPU2 wires MSB (R4/G4/B4) to lower GPIOs, so each 5-bit color channel is bit-reversed in the captured word. Same pattern as neopico-hd (MVS).
+- A pre-computed 32K-entry LUT (`g_pixel_lut[32768]`) maps raw RGB555 (with reversed bits) to corrected RGB565, eliminating all per-pixel branching from the hot capture loop.
+- The 18-bit capture word layout: `[17:HBLANK][16:12 R4-R0][11:7 G4-G0][6:2 B4-B0][1:PCLK][0:VBLANK]`. RGB555 is extracted as `(raw >> 2) & 0x7FFF`.
 
 ### Timing Constants
 - **System Clock**: 126 MHz (required for HSTX HDMI timing).

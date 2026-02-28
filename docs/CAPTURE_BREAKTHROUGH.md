@@ -38,3 +38,13 @@ line_loop:
 **Finding:** Using a large (128+ line) ring buffer caused the LED heartbeat to slow down (2-4 seconds).
 **Why:** On the RP2350, Core 0 and Core 1 share access to the RAM banks. A large buffer creates high contention between the DMA capture (Core 0) and the HDMI scanline output (Core 1).
 **Breakthrough:** **Bank-Aligned Ping-Pong Buffers.** Using two small line buffers for hardware capture and a 256-line ring buffer for output, with careful attention to memory alignment, allows both cores to run at full speed without stalling.
+
+## 6. Full 15-bit Color (RGB555 → RGB565)
+**Finding:** The initial proof-of-concept only used 1 bit (R0) to display a monochrome image. Enabling all 15 color bits produced garbled colors.
+**Why:** The PPU2 TST pins wire the MSB of each channel (R4/G4/B4) to the lower GPIO, so the 5-bit fields are bit-reversed in the captured word. This is the same pattern found in the Neo Geo MVS (neopico-hd project).
+**Breakthrough:** **Pre-computed 32K LUT with per-channel bit-reversal.** A 64KB lookup table (`g_pixel_lut[32768]`) is generated at startup. Each entry maps a raw RGB555 index (with reversed channel bits) to a corrected RGB565 value. The hot pixel loop becomes a single table lookup: `g_pixel_lut[(raw >> 2) & 0x7FFF]`.
+
+## 7. Horizontal Offset Calibration
+**Finding:** The captured image was shifted right by ~5 pixels and clipped on the right edge.
+**Why:** HBLANK deassertion does not coincide with the first valid pixel on the TST data bus. The PPU2 has an internal pipeline delay and back porch period of approximately 20 dot clocks between HBLANK falling and the first active pixel appearing.
+**Breakthrough:** **Empirical PIO skip calibration.** A 20-pixel skip loop after HBLANK falls aligns the 256-pixel capture window with the true active area. This value was determined by binary search (0→24→20) and is analogous to `H_SKIP_START=28` in the neopico-hd MVS project.
