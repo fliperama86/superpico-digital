@@ -8,7 +8,6 @@
 // Measured frequencies (updated by freq_counter_update)
 extern volatile uint32_t freq_pclk_hz;
 extern volatile uint32_t freq_r0_hz;
-extern volatile uint32_t freq_csync_hz;
 
 // Initialize frequency counter hardware
 void freq_counter_init(void);

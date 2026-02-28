@@ -1,10 +1,15 @@
 ; SNES Hard Sync Capture (With Horizontal Offset)
 ; Optimized for RP2350
-; GP20: PCLK, GP21: R0, GP26: HBLANK, GP27: VBLANK
+;
+; IN_BASE = GP27 (VBLANK, pin index 11 with GPIOBASE=16).
+; C code sets pinctrl so that:
+;   pin 0  = GP27 (VBLANK)
+;   pin 1  = GP28 (PCLK)
+;   pin 17 = GP44 (HBLANK)
 
 .program snes_hard_sync
 
-    ; Get pixel count (SNES_H_ACTIVE - 1)
+    ; One-time init: C code pushes (SNES_H_ACTIVE - 1)
     pull block
     mov y, osr
 
@@ -14,25 +19,27 @@
 
 line_loop:
     ; 2. Wait for Active Line Start (HBLANK Falling Edge)
-    wait 1 gpio 26             ; Wait for HBLANK HIGH
-    wait 0 gpio 26             ; Wait for HBLANK LOW (Active Window Starts)
-    
-    ; 3. Horizontal Offset: Skip 12 pixels to reveal the right side
-    ; SNES HBLANK usually falls slightly before the "real" active pixels.
-    set x, 11
+    wait 1 pin 17              ; Wait for HBLANK HIGH (pin 17 = GP44)
+    wait 0 pin 17              ; Wait for HBLANK LOW  - Active Window Starts
+
+    ; 3. Back porch + PPU pipeline delay: skip 20 dot clocks after HBLANK
+    ;    falls before TST pins output the first active pixel.
+    ;    (MVS equivalent: H_SKIP_START=28 in neopico-hd)
+    set x, 19
 skip_loop:
-    wait 1 gpio 20             ; Wait for PCLK Rising
-    wait 0 gpio 20             ; Wait for Falling
+    wait 0 pin 1               ; Wait for PCLK LOW  (pin 1 = GP28)
+    wait 1 pin 1               ; Wait for PCLK HIGH (pin 1 = GP28)
     jmp x-- skip_loop
 
     ; 4. Capture 256 pixels
     mov x, y
 pixel_loop:
-    wait 1 gpio 20             ; Wait for PCLK Rising Edge
-    nop [2]                    ; Stability delay
-    in pins, 2                 ; Sample [GP21:R0, GP20:PCLK]
-    wait 0 gpio 20             ; Wait for Falling Edge
-    jmp x-- pixel_loop         
+    wait 0 pin 1               ; Wait for PCLK LOW
+    wait 1 pin 1               ; Wait for PCLK HIGH (rising edge = data valid)
+    nop                        ; Data setup: allow PPU outputs to settle
+    nop                        ; Extra hold margin
+    in pins, 18                ; Sample GP27-44: VBLANK, PCLK, B4-B0, G4-G0, R4-R0, HBLANK
+    jmp x-- pixel_loop
 
     ; 5. Go back to wait for the next HBLANK
     jmp line_loop

@@ -6,7 +6,6 @@
 // Measured frequencies
 volatile uint32_t freq_pclk_hz = 0;
 volatile uint32_t freq_r0_hz = 0;
-volatile uint32_t freq_csync_hz = 0;
 
 // PIO instance
 static PIO pio_freq = pio0;
@@ -14,7 +13,6 @@ static PIO pio_freq = pio0;
 // State machines for each input
 static uint sm_pclk;
 static uint sm_r0;
-static uint sm_csync;
 
 // PIO program offset
 static uint prog_offset;
@@ -105,12 +103,10 @@ void freq_counter_init(void) {
     // Claim state machines
     sm_pclk = pio_claim_unused_sm(pio_freq, true);
     sm_r0 = pio_claim_unused_sm(pio_freq, true);
-    sm_csync = pio_claim_unused_sm(pio_freq, true);
 
     // Initialize each frequency counter
     init_sm_for_pin(pio_freq, sm_pclk, prog_offset, PIN_FREQ_PCLK);
     init_sm_for_pin(pio_freq, sm_r0, prog_offset, PIN_FREQ_R0);
-    init_sm_for_pin(pio_freq, sm_csync, prog_offset, PIN_FREQ_CSYNC);
 
     // Initialize timing
     last_sample_time = get_absolute_time();
@@ -127,14 +123,11 @@ bool freq_counter_update(void) {
     // Read counts and reset
     uint32_t count_pclk = read_and_reset_x(pio_freq, sm_pclk, prog_offset);
     uint32_t count_r0 = read_and_reset_x(pio_freq, sm_r0, prog_offset);
-    uint32_t count_csync = read_and_reset_x(pio_freq, sm_csync, prog_offset);
 
     // Calculate frequencies: freq = count / time
-    // freq_hz = count * 1000000 / elapsed_us
     if (elapsed_us > 0) {
         freq_pclk_hz = (uint32_t)((uint64_t)count_pclk * 1000000ULL / (uint64_t)elapsed_us);
         freq_r0_hz = (uint32_t)((uint64_t)count_r0 * 1000000ULL / (uint64_t)elapsed_us);
-        freq_csync_hz = (uint32_t)((uint64_t)count_csync * 1000000ULL / (uint64_t)elapsed_us);
     }
 
     // Update timestamp
