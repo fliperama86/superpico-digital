@@ -398,15 +398,28 @@ The D4 patch overrides bit 4 of PPU2's $213F status register response, which rep
 
 ## Implementation Notes
 
-### Brightness Control Problem
+### Brightness Control ($2100)
 
-The TST pins output raw 5-bit-per-channel RGB **before** the brightness multiplier is applied. The SNES applies brightness via register $2100 (INIDISP), which controls a 4-bit DAC used as reference voltage for the analog RGB DACs.
+The TST pins output raw 5-bit RGB **before** the master brightness multiplier is applied. Register $2100 (INIDISP) bits 3-0 control brightness (0=black, 15=full). Games using fades will appear at full brightness without correction.
 
-**Solution (Opatus SNES_TST approach):**
-- Snoop CPU writes to $2100 on the address/data bus
-- Implement 3× 5×4-bit multipliers in CPLD/FPGA
-- Scale digital RGB values accordingly
-- Output via external DAC (e.g., ADV7123) for analog, or directly for HDMI
+**Solution (SuperPico approach):**
+
+Snoop CPU writes to `$2100` using a second PIO state machine. When `/PWR` goes low and PA[7:0] == 0x00, latch D[3:0] as the brightness value.
+
+**Hardware:** One **74HC4078** (8-input NOR gate) combines PA[7:0] into a single `ADDR_MATCH` signal. PIO handles the AND with `/PWR`.
+
+| Tap | PPU2 Pin | Direction | Notes |
+|-----|----------|-----------|-------|
+| `/PWR` | Pin 6 | Input (passive) | CPU write strobe, active low |
+| `ADDR_MATCH` | 74HC4078 output | Input | HIGH when PA[7:0] == 0x00 |
+| D0 | Pin 15 | Input (passive) | Brightness bit 0 |
+| D1 | Pin 14 | Input (passive) | Brightness bit 1 |
+| D2 | Pin 13 | Input (passive) | Brightness bit 2 |
+| D3 | Pin 12 | Input (passive) | Brightness bit 3 |
+
+**Total: 6 GPIOs + 1 jellybean IC.** The 74HC4078 inputs connect to PPU2 PA0-PA7 (pins 17-24).
+
+**Software:** Core 0 reads the PIO FIFO and updates a global brightness value. The pixel LUT or scanline callback applies `(color * brightness) / 15`.
 
 ### Mode 7 Transparency Fix
 
@@ -425,28 +438,15 @@ The /TRANSPARENT signal (PPU2 pin 4) is HIGH during valid picture output and LOW
 - Fix Super Mario World title screen issues
 - Properly blank during horizontal/vertical sync
 
-### Recommended CPLD Connections Summary
+### SuperPico Additional Taps Summary
 
-| CPLD Input | Source | Purpose |
-|------------|--------|---------|
-| TST0-TST14 | PPU2 pins 77-92 | 15-bit digital RGB |
-| /OVER | PPU1 pin 94 | Mode 7 wrap detection |
-| /TRANSPARENT | PPU2 pin 4 | Valid pixel indicator |
-| /CSYNC | PPU2 pin 100 | Composite sync |
-| HBLANK | PPU2 pin 25 | Horizontal blank |
-| VBLANK | PPU2 pin 26 | Vertical blank |
-| /PIXEL CLK | PPU2 pin 27 | Dot clock (5.37MHz) |
-| SYSTEM CLK | PPU2 pin 31 | Master clock (21.47MHz) |
-| CPU D0-D7 | PPU2 pins 8-15 | Brightness snoop |
-| CPU PA0-PA7 | PPU2 pins 17-24 | Address snoop for $2100 |
-| /PWR | PPU2 pin 6 | CPU write strobe |
+Beyond the existing capture wiring (TST0-14, HBLANK, VBLANK, PCLK), these additional taps are needed for planned features:
 
-| CPLD Output | Destination | Purpose |
-|-------------|-------------|---------|
-| DIGITAL VIDEO ENABLE | PPU2 pin 93 | Enable TST output |
-| /OVER1 override | PPU2 pin 37 | Mode 7 fix |
-| /OVER2 override | PPU2 pin 50 | Mode 7 fix |
-| RGB out (post-brightness) | DAC or HDMI encoder | Final video output |
+| Signal | Source | GPIOs | External Parts | Feature |
+|--------|--------|-------|----------------|---------|
+| `/PWR` + `ADDR_MATCH` + D[3:0] | PPU2 pins 6, 12-15 + 74HC4078 on PA[7:0] | 6 | 74HC4078 (8-input NOR) | Brightness ($2100) |
+| `/OVER` | PPU1 pin 94 | 1 | None | Mode 7 transparency |
+| `/TRANSPARENT` | PPU2 pin 4 | 1 | None | Pixel blanking |
 
 ---
 

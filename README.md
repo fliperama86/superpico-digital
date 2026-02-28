@@ -67,7 +67,7 @@ picotool load src/superpico-digital.uf2 -f && picotool reboot
 - [x] Horizontal Centering and Offset Fixes
 - [x] Full 15-bit RGB555 Color (32K LUT with per-channel bit-reversal → RGB565)
 - [ ] Digital Audio capture
-- [ ] Master Brightness Logic ($2100)
+- [ ] Master Brightness Logic ($2100) — 6 GPIOs + 74HC4078
 - [ ] Mode 7 Transparency Patch
 
 ## Credits & References
