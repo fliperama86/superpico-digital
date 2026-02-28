@@ -66,4 +66,11 @@
 #define PIN_FREQ_R0     PIN_SNES_R0
 #define PIN_FREQ_VBLANK PIN_SNES_VBLANK
 
+// =============================================================================
+// Audio I2S Pins - GP22-24 (SNES S-DSP)
+// =============================================================================
+#define PIN_AUDIO_SDATA 22  // GP22 - S-DSP Pin 44 (serial data)
+#define PIN_AUDIO_LRCK  23  // GP23 - S-DSP Pin 43 (word select / L-R clock)
+#define PIN_AUDIO_BCLK  24  // GP24 - S-DSP Pin 42 (bit clock)
+
 #endif // SNES_PINS_H

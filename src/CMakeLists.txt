@@ -4,6 +4,9 @@ add_executable(superpico-digital
     video/video_capture.c
     video/freq_counter.c
     audio/audio_pipeline.c
+    audio/i2s_capture.c
+    audio/audio_buffer.c
+    audio/src.c
     osd/osd.c
 )
 
@@ -11,6 +14,7 @@ add_executable(superpico-digital
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/../lib/pico_hdmi ${CMAKE_CURRENT_BINARY_DIR}/pico_hdmi)
 
 pico_generate_pio_header(superpico-digital ${CMAKE_CURRENT_LIST_DIR}/video/video_capture.pio)
+pico_generate_pio_header(superpico-digital ${CMAKE_CURRENT_LIST_DIR}/audio/i2s_capture.pio)
 
 target_include_directories(superpico-digital PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}

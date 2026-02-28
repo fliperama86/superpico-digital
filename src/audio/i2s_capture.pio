@@ -1,0 +1,83 @@
+.program i2s_capture
+
+; S-DSP serial audio capture.
+; 16-bit right-justified in 24-bit frames, ~32kHz.
+; Pins: pin 0=SDATA, pin 1=LRCK, pin 2=BCLK (relative to IN_BASE).
+;
+; S-DSP shifts data on falling edge of BCLK; data is stable during
+; the HIGH period. Sample after rising edge + nop hold margin.
+; (Same approach as neopico-hd's proven I2S capture.)
+;
+; LRCK polarity: HIGH = Left, LOW = Right
+
+    ; Robust sync: verify bus is active before starting capture.
+    ; Step 1: Stall until BCLK is toggling
+    wait 0 pin 2                ; BCLK Low
+    wait 1 pin 2                ; BCLK High — bus is clocking
+
+    ; Step 2: Sync to LRCK falling edge (right channel boundary)
+    wait 1 pin 1                ; LRCK High
+    wait 0 pin 1                ; LRCK Low
+
+    ; Step 3: Count 24 BCLK edges to verify real frame timing
+    set x, 23
+sync_verify:
+    wait 0 pin 2
+    wait 1 pin 2
+    jmp x-- sync_verify
+
+    ; Step 4: Re-sync to next clean LRCK cycle
+    wait 1 pin 1                ; LRCK High
+    wait 0 pin 1                ; LRCK Low — right channel starts
+
+.wrap_target
+    ; === RIGHT CHANNEL (LRCK LOW) ===
+    set x, 23                   ; Capture 24 bits
+right_loop:
+    wait 0 pin 2                ; BCLK Low
+    wait 1 pin 2                ; BCLK High (rising edge — data stable)
+    nop                         ; Hold margin before sampling
+    in pins, 1                  ; Sample SDATA
+    jmp x-- right_loop
+    push noblock
+
+    ; === LEFT CHANNEL (LRCK HIGH) ===
+    wait 1 pin 1                ; Wait for LRCK High
+    set x, 23
+left_loop:
+    wait 0 pin 2                ; BCLK Low
+    wait 1 pin 2                ; BCLK High (rising edge — data stable)
+    nop                         ; Hold margin before sampling
+    in pins, 1                  ; Sample SDATA
+    jmp x-- left_loop
+    push noblock
+
+    wait 0 pin 1                ; Wait for LRCK Low (next frame)
+.wrap
+
+% c-sdk {
+#include "hardware/gpio.h"
+
+static inline void i2s_capture_program_init(PIO pio, uint sm, uint offset, uint pin_dat, uint pin_ws, uint pin_bck) {
+    pio_sm_config c = i2s_capture_program_get_default_config(offset);
+
+    // IN pin base = SDATA; wait pin 0=SDATA, 1=LRCK, 2=BCLK
+    sm_config_set_in_pins(&c, pin_dat);
+
+    // Shift LEFT (MSB first), no autopush.
+    sm_config_set_in_shift(&c, false, false, 32);
+
+    // Join FIFOs for 8-word RX depth
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+
+    pio_gpio_init(pio, pin_dat);
+    pio_gpio_init(pio, pin_bck);
+    pio_gpio_init(pio, pin_ws);
+
+    pio_sm_set_pindirs_with_mask64(pio, sm, 0,
+        (1ull << pin_dat) | (1ull << pin_bck) | (1ull << pin_ws));
+
+    sm_config_set_clkdiv(&c, 1.0f);
+    pio_sm_init(pio, sm, offset, &c);
+}
+%}

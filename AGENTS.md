@@ -3,39 +3,65 @@
 This file provides specific guidance for AI agents (Claude Code, etc.) working on this repository.
 
 ## CRITICAL RULES
+
 - **DO NOT** modify the content of the `lib/` folder (especially `pico_hdmi`). It is a submodule managed externally.
 - **DO NOT** change HSTX timing constants without explicit approval; the RP2350 requires precise PLL settings for HDMI.
 - **ALWAYS** perform tool calls in parallel when possible.
 
+## Guidelines
+
+- Don’t change any code or run any non-read-only-commands without informing me and discussing it first.
+- Be extremely methodical, performing one step at a time and ensuring it works properly before continuing.
+- Do not commit code unless explicitly told otherwise.
+
 ## Architecture & Implementation Details
 
 ### Dual-Core Design
+
 - **Core 0**: Handles the high-level capture loop. It polls the `VBLANK` GPIO falling edge to identify the start of an active frame and then signals the PIO State Machine via IRQ 4.
 - **Core 1**: Dedicated to HDMI output. Runs the `video_output_core1_run` loop from `libpico_hdmi`.
 
 ### Video Capture Strategy (Hard Sync)
+
 The capture logic is defined in `src/video/video_capture.pio`.
+
 1. **Phase Locking**: The PIO waits for a full PCLK cycle (`wait 1` -> `wait 0`) after `HBLANK` falls. This eliminates horizontal jitter by ensuring the capture loop starts at the exact same phase relative to the SNES clock on every line.
 2. **Setup Delay**: Two `nop` instructions (~16ns at 126 MHz) are placed after the PCLK rising edge to allow the raw data bits (TST pins) to stabilize before sampling.
 3. **Horizontal Offset**: A 20-pixel skip loop is implemented in PIO to compensate for the PPU2 back porch and pipeline delay between HBLANK deasserting and valid pixel data appearing on the TST pins.
 
 ### Pixel Conversion
+
 - The PPU2 wires MSB (R4/G4/B4) to lower GPIOs, so each 5-bit color channel is bit-reversed in the captured word. Same pattern as neopico-hd (MVS).
 - A pre-computed 32K-entry LUT (`g_pixel_lut[32768]`) maps raw RGB555 (with reversed bits) to corrected RGB565, eliminating all per-pixel branching from the hot capture loop.
 - The 18-bit capture word layout: `[17:HBLANK][16:12 R4-R0][11:7 G4-G0][6:2 B4-B0][1:PCLK][0:VBLANK]`. RGB555 is extracted as `(raw >> 2) & 0x7FFF`.
 
 ### Timing Constants
+
 - **System Clock**: 126 MHz (required for HSTX HDMI timing).
 - **SNES Resolution**: 256x224 (NTSC).
 - **HDMI Resolution**: 640x480 @ 60Hz.
 
 ### Memory Layout
+
 - **Ring Buffer**: `line_ring_t` in `src/video/line_ring.h` manages the handover between Core 0 and Core 1.
 - **DMA**: Uses a ping-pong buffer strategy (`g_line_buffers[2]`) to ensure the PIO/DMA can capture the next line while the CPU is processing the current one.
 
 ## Key Files
+
 - `src/main.c`: Entry point and core sync logic.
 - `src/video/video_capture.c`: DMA and state machine management.
 - `src/video/video_capture.pio`: Low-level timing and sync implementation.
 - `src/video/video_pipeline.c`: Scanline callback and scaling logic.
 - `docs/CAPTURE_BREAKTHROUGH.md`: Detailed history of signal discovery and jitter fixes.
+
+## Session Memory (Required)
+
+- Maintain `SCRATCHBOOK.md` as persistent cross-session memory.
+- Update `SCRATCHBOOK.md` on nearly every user interaction with concise entries.
+- Always record:
+  - User preferences and workflow constraints.
+  - What was attempted, what worked, and what failed/regressed.
+  - Current hypotheses, safe/unsafe patterns, and next recommended steps.
+- Keep entries factual, timestamped, and short (append-only log style).
+- Prefer introducing risky or experimental behavior behind compile-time feature flags (`#ifdef`/macros).
+- Default policy for experiments: flag-gated, off by default, easy rollback path, avoid direct regression risk.
