@@ -66,6 +66,7 @@ picotool load src/superpico-digital.uf2 -f && picotool reboot
 - [x] HDMI Signal Stability (640x480)
 - [x] Horizontal Centering and Offset Fixes
 - [x] Full 15-bit RGB555 Color (32K LUT with per-channel bit-reversal → RGB565)
+- [ ] Digital Audio capture
 - [ ] Master Brightness Logic ($2100)
 - [ ] Mode 7 Transparency Patch
 
