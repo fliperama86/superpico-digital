@@ -127,9 +127,12 @@ void video_capture_run(void) {
       gpio_xor_mask(1ul << PICO_DEFAULT_LED_PIN);
     }
 
-    // 2. Align PIO and DMA to the start of the frame
-    video_capture_reset_hardware();
-    dma_channel_abort(g_dma_chan);
+    // 2. Lightweight PIO reset — JMP back to wrap_target (skips pull/mov y)
+    pio_sm_set_enabled(g_pio_snes, g_sm_pixel, false);
+    pio_sm_clear_fifos(g_pio_snes, g_sm_pixel);
+    pio_sm_exec(g_pio_snes, g_sm_pixel,
+                pio_encode_jmp(g_offset_pixel + 2));
+    pio_sm_set_enabled(g_pio_snes, g_sm_pixel, true);
     dma_channel_set_trans_count(g_dma_chan, SNES_H_ACTIVE, false);
     dma_channel_set_write_addr(g_dma_chan, g_line_buffers[0], true);
 
@@ -140,21 +143,35 @@ void video_capture_run(void) {
     pio_interrupt_clear(g_pio_snes, 4);
     pio_sm_exec(g_pio_snes, g_sm_pixel, pio_encode_irq_set(false, 4));
 
+    uint32_t buf_idx = 0;
     for (uint16_t y = 0; y < g_snes_height; y++) {
       uint16_t *dst = line_ring_write_ptr(y);
 
       dma_channel_wait_for_finish_blocking(g_dma_chan);
 
-      uint32_t *captured_buf = g_line_buffers[y % 2];
+      uint32_t *captured_buf = g_line_buffers[buf_idx];
+      buf_idx ^= 1U;
+
       if (y + 1 < g_snes_height) {
         dma_channel_set_trans_count(g_dma_chan, SNES_H_ACTIVE, false);
-        dma_channel_set_write_addr(g_dma_chan, g_line_buffers[(y + 1) % 2],
-                                   true);
+        dma_channel_set_write_addr(g_dma_chan, g_line_buffers[buf_idx], true);
       }
 
-      for (int x = 0; x < SNES_H_ACTIVE; x++) {
-        dst[x] = g_pixel_lut[(captured_buf[x] >> 2) & 0x7FFF];
+      // Unrolled 4-pixel conversion (matches neopico-hd)
+      const uint16_t *lut = g_pixel_lut;
+      const uint32_t *src = captured_buf;
+      int remaining = SNES_H_ACTIVE;
+      while (remaining >= 4) {
+        dst[0] = lut[(src[0] >> 2) & 0x7FFF];
+        dst[1] = lut[(src[1] >> 2) & 0x7FFF];
+        dst[2] = lut[(src[2] >> 2) & 0x7FFF];
+        dst[3] = lut[(src[3] >> 2) & 0x7FFF];
+        dst += 4;
+        src += 4;
+        remaining -= 4;
       }
+      while (remaining-- > 0)
+        *dst++ = lut[(*src++ >> 2) & 0x7FFF];
 
       line_ring_commit(y + 1);
     }

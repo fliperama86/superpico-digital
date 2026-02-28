@@ -46,12 +46,15 @@ static inline bool line_ring_ready(uint16_t line) {
   uint32_t write_pos = g_line_ring.write_idx;
   if (target_idx >= write_pos)
     return false;
-  // With 256 lines, we can hold the entire SNES frame easily.
+  // Overrun detection: if writer has lapped reader, data is stale.
+  if (write_pos - target_idx > LINE_RING_SIZE)
+    return false;
   return true;
 }
 
 static inline const uint16_t *line_ring_read_ptr(uint16_t line) {
   uint32_t target_idx = g_line_ring.read_frame_start + line;
+  __dmb();
   return g_line_ring.lines[target_idx % LINE_RING_SIZE];
 }
 

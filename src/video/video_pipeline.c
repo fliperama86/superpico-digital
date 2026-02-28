@@ -4,10 +4,22 @@
 #include "pico/stdlib.h"
 #include <string.h>
 
+#define OVERSCAN_COLOR_RGB565    0x0000   // black border
+#define NO_SIGNAL_COLOR_RGB565   0x7BEF   // mid gray (~50%) - no-signal indicator
+
+#define H_WORDS (MODE_H_ACTIVE_PIXELS / 2)
+#define H_BORDER_WORDS 32  // 64 pixels / 2 pixels per word
+
 line_ring_t g_line_ring __attribute__((aligned(64)));
 
 void video_pipeline_init(void) {
     memset(&g_line_ring, 0, sizeof(g_line_ring));
+}
+
+static inline void __scratch_y("")
+fill_rgb565(uint32_t *dst, uint32_t words, uint16_t color) {
+    const uint32_t packed = ((uint32_t)color << 16) | color;
+    for (uint32_t i = 0; i < words; i++) dst[i] = packed;
 }
 
 // Fast 2x pixel doubling
@@ -33,30 +45,27 @@ void __scratch_x("") scanline_callback(uint32_t v_scanline, uint32_t active_line
     uint32_t source_line = active_line / 2;
 
     if (source_line >= FRAME_HEIGHT / 2) {
-        memset(dst, 0, MODE_H_ACTIVE_PIXELS * 2);
+        fill_rgb565(dst, H_WORDS, OVERSCAN_COLOR_RGB565);
         return;
     }
 
     // Centering if needed (SNES is 224 lines, we show 240)
     if (source_line < V_OFFSET || source_line >= V_OFFSET + SNES_V_ACTIVE) {
-        memset(dst, 0, MODE_H_ACTIVE_PIXELS * 2);
+        fill_rgb565(dst, H_WORDS, OVERSCAN_COLOR_RGB565);
         return;
     }
 
     uint16_t snes_line = source_line - V_OFFSET;
 
     if (!line_ring_ready(snes_line)) {
-        // Show very dim gray if not ready to distinguish from no-signal
-        uint32_t gray32 = 0x08410841; 
-        for(int i=0; i<MODE_H_ACTIVE_PIXELS/2; i++) dst[i] = gray32;
+        fill_rgb565(dst, H_WORDS, NO_SIGNAL_COLOR_RGB565);
         return;
     }
 
     const uint16_t *src = line_ring_read_ptr(snes_line);
-    
+
     // Horizontal centering: (640 - (256*2)) / 2 = 64 pixels left/right
-    // 64 pixels = 32 uint32 pairs
-    memset(dst, 0, 64 * 2);
-    double_pixels_fast(dst + 32, src, SNES_H_ACTIVE);
-    memset(dst + 32 + SNES_H_ACTIVE, 0, 64 * 2);
+    fill_rgb565(dst, H_BORDER_WORDS, OVERSCAN_COLOR_RGB565);
+    double_pixels_fast(dst + H_BORDER_WORDS, src, SNES_H_ACTIVE);
+    fill_rgb565(dst + H_BORDER_WORDS + SNES_H_ACTIVE, H_BORDER_WORDS, OVERSCAN_COLOR_RGB565);
 }
