@@ -1,9 +1,8 @@
 # SNES Digital AV Mod - Complete Pin Reference
 
-> **Target Repository:** Fork of [michael-hirschmugl/SNES_TST](https://github.com/michael-hirschmugl/SNES_TST)  
-> **Original Project:** [Opatusos/SNES_TST](https://github.com/Opatusos/SNES_TST)  
+> **Project:** SuperPico Digital (RP2350B + HDMI via HSTX)  
 > **Applicable Hardware:** 2-chip/3-chip SNES (NOT 1-CHIP)  
-> **Last Updated:** January 2026
+> **Last Updated:** March 2026
 
 ---
 
@@ -17,7 +16,7 @@
 6. [Implementation Notes](#implementation-notes)
 7. [Signal Timing and Clocks](#signal-timing-and-clocks)
 8. [Known Issues and Solutions](#known-issues-and-solutions)
-9. [References](#references)
+9. [References](REFERENCES.md)
 
 ---
 
@@ -28,23 +27,6 @@ This document provides a complete reference for all pins relevant to implementin
 ### Why 2-Chip/3-Chip Only?
 
 The 1-CHIP SNES (S-CPUN) consolidates PPU1 and PPU2 into a single die. While it has TST pins, it does **not expose the blanking signals** (OVER, TOUMEI) needed to properly handle Mode 7 transparency and other edge cases. Only the discrete 2-chip PPU2 exposes these critical control signals.
-
-### Project Status (SNES_TST)
-
-The michael-hirschmugl fork contains 109 commits with the following verified/planned features:
-
-
-| Feature                   | Status     |
-| ------------------------- | ---------- |
-| Dual analog output        | Verified   |
-| Mode-7 patch (TST pins)   | Verified   |
-| SuperCIC                  | Verified   |
-| Dual-frequency oscillator | Not tested |
-| Controller support        | Partial    |
-| Dejitter                  | Not tested |
-| D4 region patch           | Not tested |
-| RGB LED PWM               | Not tested |
-
 
 ---
 
@@ -378,8 +360,9 @@ The S-DSP outputs serial digital audio that can be converted to S/PDIF for prist
 
 ### Digital Audio Implementation Notes
 
-For S/PDIF conversion, use a chip like the Cirrus Logic CS8405A or CS8406, or Texas Instruments DIT4096. Connect:
+**SuperPico approach:** SDATA, LRCK, and BCLK are captured directly by the RP2350B via PIO/DMA, upsampled from ~32kHz to 48kHz, and embedded into the HDMI stream via data island packets. No external S/PDIF encoder IC is required.
 
+For standalone S/PDIF output (not used in SuperPico), use a chip like the Cirrus Logic CS8405A or Texas Instruments DIT4096:
 
 | S-DSP Pin      | S/PDIF Encoder Pin | Notes                   |
 | -------------- | ------------------ | ----------------------- |
@@ -387,8 +370,7 @@ For S/PDIF conversion, use a chip like the Cirrus Logic CS8405A or CS8406, or Te
 | Pin 43 (LRCK)  | LRCK/FSYNC         | Word clock / Frame sync |
 | Pin 42 (BCLK)  | SCLK               | Serial clock            |
 
-
-**Important:** The S-DSP outputs at approximately 32.040kHz (not exactly 32kHz) due to the 24.576MHz crystal. Replace the ceramic resonator X2 with a precision crystal oscillator for stable output.
+**Important:** The S-DSP outputs at approximately 32.040kHz (not exactly 32kHz) due to the 24.576MHz crystal. SuperPico's SRC (sample rate converter) compensates for this in firmware.
 
 ---
 
@@ -432,57 +414,80 @@ The D4 patch overrides bit 4 of PPU2's $213F status register response, which rep
 
 ### Brightness Control ($2100)
 
-The TST pins output raw 5-bit RGB **before** the master brightness multiplier is applied. Register $2100 (INIDISP) bits 3-0 control brightness (0=black, 15=full). Games using fades will appear at full brightness without correction.
+The TST pins output raw 5-bit RGB **before** the master brightness multiplier is applied. Register `$2100` (INIDISP) bits 3–0 control brightness (0=black, 15=full). Games using fades will appear at full brightness without correction.
 
-**Solution (SuperPico approach):**
+#### Brightness Update Timing
 
-Snoop CPU writes to `$2100` using a second PIO state machine. When `/PWR` goes low and PA[7:0] == 0x00, latch D[3:0] as the brightness value.
+The brightness value is not fixed for a whole frame — the CPU can write `$2100` at any time:
 
-**Hardware:** One **74HC4078** (8-input NOR gate) combines PA[7:0] into a single `ADDR_MATCH` signal. PIO handles the AND with `/PWR`.
+| Granularity | Mechanism | Examples |
+| ----------- | --------- | -------- |
+| Per-frame | CPU writes during VBLANK | SMW level fades, title screen fade-in/out, Super Metroid |
+| Per-scanline | HDMA writes `$2100` each HBLANK | Raster brightness effects (rare) |
+| Mid-scanline | Direct CPU write outside blanking | Almost never done in retail software; causes hardware glitches |
 
+**Recommended sampling rate: once per scanline (at HBLANK).** This correctly handles both frame-level fades and any per-line HDMA raster effects. Sampling only once per frame would miss scanline-based brightness changes.
 
-| Tap          | PPU2 Pin        | Direction       | Notes                        |
-| ------------ | --------------- | --------------- | ---------------------------- |
-| `/PWR`       | Pin 6           | Input (passive) | CPU write strobe, active low |
-| `ADDR_MATCH` | 74HC4078 output | Input           | HIGH when PA[7:0] == 0x00    |
-| D0           | Pin 15          | Input (passive) | Brightness bit 0             |
-| D1           | Pin 14          | Input (passive) | Brightness bit 1             |
-| D2           | Pin 13          | Input (passive) | Brightness bit 2             |
-| D3           | Pin 12          | Input (passive) | Brightness bit 3             |
+The single-dot "Early Read Glitch" (a hardware bug where PPU2 briefly latches the wrong brightness for ~1 pixel during a mid-scanline write) does not need to be emulated — no retail game intentionally triggers it.
 
+#### Hardware Solution (QSB approach)
 
-**Total: 6 GPIOs + 1 jellybean IC.** The 74HC4078 inputs connect to PPU2 PA0-PA7 (pins 17-24).
+Brightness detection and latching is handled entirely on the QSB daughter board, delivering 4 stable GPIO lines to the RP2350 that always hold the last value written to `$2100`.
 
-**Software:** Core 0 reads the PIO FIFO and updates a global brightness value. The pixel LUT or scanline callback applies `(color * brightness) / 15`.
+| QSB Component | Function |
+| ------------- | -------- |
+| 8-input NOR gate (PA0–PA7) | Produces `ADDR_MATCH` — HIGH only when B-bus address == `$00` |
+| AND gate (`ADDR_MATCH` + `/PWR`) | Produces `WRITE_2100` pulse when CPU writes to `$2100` |
+| 74HC175 (4-bit latch) | Clocked by `WRITE_2100`; holds D[3:0] stable on output |
+
+PPU2 pins tapped:
+
+| Signal | PPU2 Pin | Notes |
+| ------ | -------- | ----- |
+| `/PWR` | 6 | CPU write strobe, active low |
+| PA0–PA7 | 17–24 | B-bus address (into NOR gate on QSB) |
+| D0 | 15 | Brightness bit 0 (LSB) |
+| D1 | 14 | Brightness bit 1 |
+| D2 | 13 | Brightness bit 2 |
+| D3 | 12 | Brightness bit 3 (MSB) |
+
+**FPC to RP2350:** 4 lines only (`Brightness[3:0]`). No timing-critical bus snooping needed on the main board.
+
+#### Software
+
+Read `Brightness[3:0]` from GPIOs once per scanline at HBLANK. Apply to each pixel:
+
+```c
+output_channel = (raw_channel * brightness) / 15;
+```
+
+Or pre-compute a per-brightness LUT to eliminate the multiply from the hot path.
+
+**Note on D7 (force-blank):** D7 forces the screen black regardless of the brightness nibble, but is almost exclusively used during VBLANK for safe VRAM access. It is rarely asserted mid-frame in retail software. D[3:0] alone covers all practical fade effects; D7 can be omitted if GPIOs are scarce.
 
 ### Mode 7 Transparency Fix
 
 When Mode 7 wraps around (pixels outside the 128×128 tile map with transparency mode enabled), /OVER from PPU1 goes low. The digital output continues showing stale data instead of transparency.
 
-**Solution:**
-
-1. Connect PPU1 pin 94 (/OVER) to a GPIO — when low, pixel is outside the Mode 7 playfield
-2. Connect PPU2 pin 4 (/TRANSPARENT) to a GPIO — low during sync/burst and when pixel should be transparent
-3. In software, output color 0 (transparent) when either signal indicates invalid pixel data
+**SuperPico / QSB approach:** `/OVER` (PPU1 pin 94) and `/TRANSPARENT` (PPU2 pin 4) are combined into a single `PIXEL_VALID` signal on the QSB daughter board using an AND gate. The RP2350 reads one GPIO; when LOW, the pixel is suppressed (output color 0). See Appendix B for the full QSB signal flow.
 
 ### TOUMEI Signal Usage
 
-The /TRANSPARENT signal (PPU2 pin 4) is HIGH during valid picture output and LOW during sync/burst periods. Use this to:
+The /TRANSPARENT signal (PPU2 pin 4) is HIGH during valid picture output and LOW during sync/burst periods. In SuperPico this signal is ANDed with /OVER on the QSB to produce `PIXEL_VALID`, which:
 
-- Gate the digital video output
-- Fix Super Mario World title screen issues
-- Properly blank during horizontal/vertical sync
+- Gates the digital video output
+- Fixes Super Mario World title screen issues
+- Properly blanks during horizontal/vertical sync
 
-### SuperPico Additional Taps Summary
+### SuperPico QSB Taps Summary
 
-Beyond the existing capture wiring (TST0-14, HBLANK, VBLANK, PCLK), these additional taps are needed for planned features:
+Beyond the core capture wiring (TST0–14, HBLANK, VBLANK, PCLK), these signals are tapped at the SNES and preprocessed on the QSB daughter board before reaching the RP2350:
 
-
-| Signal                         | Source                                   | GPIOs | External Parts         | Feature             |
-| ------------------------------ | ---------------------------------------- | ----- | ---------------------- | ------------------- |
-| `/PWR` + `ADDR_MATCH` + D[3:0] | PPU2 pins 6, 12-15 + 74HC4078 on PA[7:0] | 6     | 74HC4078 (8-input NOR) | Brightness ($2100)  |
-| `/OVER`                        | PPU1 pin 94                              | 1     | None                   | Mode 7 transparency |
-| `/TRANSPARENT`                 | PPU2 pin 4                               | 1     | None                   | Pixel blanking      |
+| Signal on QSB | SNES Source | Delivered to RP2350 as | Feature |
+| ------------- | ----------- | ---------------------- | ------- |
+| `/OVER` + `/TRANSPARENT` | PPU1 p94 + PPU2 p4 | `PIXEL_VALID` (1 GPIO, ANDed on QSB) | Mode 7 + pixel blanking |
+| PA0–PA7 → NOR → `/PWR` AND → latch | PPU2 p17–24, p6, p12–15 | `Brightness[3:0]` (4 GPIOs, latched on QSB) | Brightness ($2100) |
+| PALMODE | PPU2 p30 | `PALMODE` (1 GPIO, pass-through) | PAL/NTSC detection |
 
 
 ---
@@ -513,7 +518,11 @@ Beyond the existing capture wiring (TST0-14, HBLANK, VBLANK, PCLK), these additi
 
 ### Dejitter Note
 
-NTSC SNES outputs a shorter scanline in the non-visible area, causing sync issues with some capture devices and scalers (notably OSSC in certain modes). The dejitter mod pauses the clock briefly to normalize scanline length. This is implemented in the SNES_TST CPLD firmware (currently listed as "not tested").
+NTSC SNES outputs a shorter scanline in the non-visible area, which causes sync issues with analog capture devices and scalers such as OSSC. The dejitter mod pauses the pixel clock briefly to normalize scanline length.
+
+**SuperPico:** This is not applicable. SuperPico captures the SNES signal digitally and outputs HDMI directly at 640×480@60Hz from the RP2350B. The HDMI output has its own independent, stable timing — the SNES clock irregularity is absorbed in the capture pipeline and does not propagate to the output. No dejitter hardware is needed.
+
+For other digital mod approaches that output analog RGB to a scaler, a dejitter mod is typically required — see [REFERENCES.md](REFERENCES.md) for prior art.
 
 ---
 
@@ -521,102 +530,216 @@ NTSC SNES outputs a shorter scanline in the non-visible area, causing sync issue
 
 ### Issue: Digital output missing brightness control
 
-**Symptom:** Games using brightness fades appear at full brightness  
-**Solution:** Snoop $2100 writes via PIO (see Brightness Control section above)
+**Symptom:** Games using brightness fades (SMW level transitions, Super Metroid) appear at full brightness  
+**Solution (SuperPico):** Brightness latch on QSB captures D[3:0] on every `$2100` write. RP2350 reads `Brightness[3:0]` once per scanline at HBLANK and applies `(color * brightness) / 15`. See Brightness Control section and Appendix B.
 
 ### Issue: Mode 7 shows garbage at screen edges
 
 **Symptom:** Artifacts outside Mode 7 playfield (e.g., Super Mario Kart, F-Zero)  
-**Solution:** Monitor /OVER signal, force transparency when appropriate
+**Solution (SuperPico):** QSB ANDs `/OVER` (PPU1 p94) and `/TRANSPARENT` (PPU2 p4) into `PIXEL_VALID`. RP2350 outputs color 0 whenever `PIXEL_VALID` is LOW.
 
 ### Issue: Super Mario World title screen corrupted
 
 **Symptom:** Star animation shows incorrect colors  
-**Solution:** Use TOUMEI signal to properly gate output
-
-### Issue: Ship duplication in Super Metroid intro
-
-**Symptom:** Visible when switching between analog and digital RGB  
-**Solution:** PPU pipeline delay causes desync; avoid mid-frame switching
+**Solution (SuperPico):** Handled by the same `PIXEL_VALID` signal (see above). `/TRANSPARENT` going LOW during the affected periods suppresses the invalid pixel data.
 
 ### Issue: OSSC/scaler compatibility problems
 
-**Symptom:** Picture jitter or sync loss  
-**Solution:** Implement dejitter in CPLD; use stable clock generation
+**Symptom:** Picture jitter or sync loss on analog scalers  
+**Note:** Not applicable to SuperPico. SuperPico outputs HDMI directly from the RP2350B at 640×480@60Hz with independent stable timing. SNES clock irregularities are absorbed in the capture pipeline and do not affect the HDMI output.
 
-### Issue: Audio dropouts with S/PDIF mod
+### Issue: Audio dropouts
 
-**Symptom:** Occasional pops or gaps in digital audio  
-**Solution:** Keep serial data wires short; replace ceramic resonator with crystal oscillator
+**Symptom:** Occasional pops or gaps in audio  
+**Solution (SuperPico):** Audio is captured via PIO/DMA from S-DSP and embedded in HDMI. Keep SDATA/LRCK/BCLK traces short. The SRC (sample rate converter) in firmware handles the ~32.040kHz → 48kHz conversion with drift compensation. A bad solder joint on LRCK (S-DSP pin 43) is a common source of framing errors — verify with a scope or logic analyzer.
 
 ---
 
 ## References
 
-### Primary Sources
-
-- **SNESdev Wiki PPU Pinout:** [https://snes.nesdev.org/wiki/PPU_pinout](https://snes.nesdev.org/wiki/PPU_pinout)
-- **SNESdev Wiki APU Pinout:** [https://snes.nesdev.org/wiki/APU_pinout](https://snes.nesdev.org/wiki/APU_pinout)
-- **Fullsnes (nocash):** [https://problemkaputt.de/fullsnes.htm](https://problemkaputt.de/fullsnes.htm)
-- **Super Famicom Development Wiki:** [https://wiki.superfamicom.org/](https://wiki.superfamicom.org/)
-
-### Project Repositories
-
-- **SNES_TST (michael-hirschmugl fork):** [https://github.com/michael-hirschmugl/SNES_TST](https://github.com/michael-hirschmugl/SNES_TST)
-- **SNES_TST (Opatusos original):** [https://github.com/Opatusos/SNES_TST](https://github.com/Opatusos/SNES_TST)
-- **SNES MultiRegion with DeJitter:** [https://github.com/borti4938/SNES_MultiRegion_with_DeJitter_QID](https://github.com/borti4938/SNES_MultiRegion_with_DeJitter_QID)
-
-### Forum Discussions
-
-- **Shmups.system11.org TST Thread:** [https://shmups.system11.org/viewtopic.php?f=6&t=66597](https://shmups.system11.org/viewtopic.php?f=6&t=66597)
-- **Circuit-board.de Decapped PPU Analysis:** [https://circuit-board.de/forum/index.php/Thread/25396](https://circuit-board.de/forum/index.php/Thread/25396)
-
-### Related Mods
-
-- **SNES/PDIF Digital Audio (qwertymodo):** [https://www.qwertymodo.com/hardware-projects/snes/snespdif-digital-audio-mod](https://www.qwertymodo.com/hardware-projects/snes/snespdif-digital-audio-mod)
-- **SuperCIC Project:** [https://sd2snes.de/blog/cool-stuff/supercic](https://sd2snes.de/blog/cool-stuff/supercic)
-
-### Schematics
-
-- **jwdonal Official SNES Schematics:** Available on gamesx.com wiki
-- **1-CHIP PAL SNES Schematic:** [https://videogameperfection.com/forums/topic/schematic-for-1chip-pal-snes/](https://videogameperfection.com/forums/topic/schematic-for-1chip-pal-snes/)
+See [REFERENCES.md](REFERENCES.md) for all hardware documentation sources, prior art, and credits.
 
 ---
 
 ## Appendix A: Quick Pin Reference Card
 
-### Essential PPU2 Pins for Digital Video
+### PPU2 Pins — Core Digital RGB Capture
 
-```
-Digital RGB Enable:  Pin 93 (connect via CPLD to /OVER logic)
-Red[4:0]:           Pins 81,80,79,78,77 (TST4-TST0)
-Green[4:0]:         Pins 87,86,85,84,82 (TST9-TST5)
-Blue[4:0]:          Pins 92,91,90,89,88 (TST14-TST10)
-/CSYNC:             Pin 100
-/TRANSPARENT:       Pin 4
-HBLANK:             Pin 25
-VBLANK:             Pin 26
-/PIXEL CLK:         Pin 27
-SYSTEM CLK:         Pin 31
-/OVER1:             Pin 37 (from PPU1)
-/OVER2:             Pin 50 (from PPU1)
-```
+
+| Signal             | Pin(s)             | Notes                           |
+| ------------------ | ------------------ | ------------------------------- |
+| Digital RGB Enable | 93                 | Connect to PPU1 /OVER (pin 94) via QSB logic |
+| Red[4:0]           | 81, 80, 79, 78, 77 | TST4–TST0                       |
+| Green[4:0]         | 87, 86, 85, 84, 82 | TST9–TST5                       |
+| Blue[4:0]          | 92, 91, 90, 89, 88 | TST14–TST10                     |
+| HBLANK             | 25                 |                                 |
+| VBLANK             | 26                 |                                 |
+| /PIXEL CLK         | 27                 |                                 |
+| /CSYNC             | 100                |                                 |
+| /OVER1             | 37                 | Mode 7 overflow input from PPU1 |
+| /OVER2             | 50                 | Mode 7 overflow input from PPU1 |
+
+
+### PPU2 Pins — Transparency & Pixel Blanking (Mode 7 + SMW fix)
+
+
+| Signal                | Pin | Notes                                             |
+| --------------------- | --- | ------------------------------------------------- |
+| /TRANSPARENT (TOUMEI) | 4   | High = opaque pixel; low = transparent/sync/burst |
+
+
+**Required for:** Mode 7 wrap-around transparency, Super Mario World star animation fix, correct blanking during sync periods.
+
+### PPU2 Pins — Brightness & Fade ($2100 INIDISP)
+
+
+| Signal  | Pin(s) | Notes                                                                                             |
+| ------- | ------ | ------------------------------------------------------------------------------------------------- |
+| /PWR    | 6      | CPU write strobe, active low                                                                      |
+| D0      | 15     | INIDISP bit 0 — brightness LSB                                                                    |
+| D1      | 14     | INIDISP bit 1                                                                                     |
+| D2      | 13     | INIDISP bit 2                                                                                     |
+| D3      | 12     | INIDISP bit 3 — brightness MSB                                                                    |
+| D7      | 8      | INIDISP bit 7 — force-blank; screen forced black *(optional — rarely used mid-frame in practice)* |
+| PA0–PA7 | 17–24  | B-bus address; feed into 74HC4078 NOR → ADDR_MATCH signal                                         |
+
+
+**External ICs required (on QSB):** 74HC4078 (8-input NOR gate) wired to PA0–PA7 produces `ADDR_MATCH` (HIGH when address == `$00`). An AND gate combines `ADDR_MATCH` + `/PWR` into `WRITE_2100`. A 74HC175 (4-bit latch) clocked by `WRITE_2100` holds D[3:0] stable on its outputs. The RP2350 reads `Brightness[3:0]` at any time — no timing-critical bus snooping on the main board.
+
+**Required for:** Any game using fade-to/from-black via $2100 — Super Mario World level transitions, Super Metroid fades, most title screens, etc.
 
 ### Essential PPU1 Pins
 
-```
-/OVER:              Pin 94 (critical for Mode 7 fix)
-PALMODE:            Pin 24 (region switching)
-/PIXEL CLK OUT:     Pin 93
-```
+
+| Signal         | Pin | Notes                                                |
+| -------------- | --- | ---------------------------------------------------- |
+| /OVER          | 94  | Mode 7 overflow source; connect to PPU2 pins 37 & 50 |
+| PALMODE        | 24  | Region switching — must match PPU2 pin 30            |
+| /PIXEL CLK OUT | 93  |                                                      |
+
 
 ### Essential S-DSP Pins for Digital Audio
 
+
+| Signal | Pin | Notes                 |
+| ------ | --- | --------------------- |
+| SDATA  | 44  | Serial audio data     |
+| LRCK   | 43  | Left/right word clock |
+| BCLK   | 42  | Bit clock             |
+
+
+---
+
+## Appendix B: Daughter Board / QSB — FPC Signal List
+
+This appendix documents the signals that travel from the **daughter board** (soldered near PPU2/PPU1) to the **main RP2350 board** over the FPC connector.
+
+The daughter board preprocesses raw SNES signals before they reach the Pico, reducing FPC pin count and simplifying firmware.
+
+### Signal Flow Diagram
+
 ```
-SDATA:              Pin 44
-LRCK:               Pin 43
-BCLK:               Pin 42
+PPU2 / PPU1                  QSB Logic                       FPC → RP2350
+───────────                  ─────────                       ────────────
+
+TST0–14  ──[routing reorder]──────────────────────────────── RGB[14:0] ┐
+HBLANK   ──────────────────────────────────────────────────── HBLANK   │ 18-bit
+VBLANK   ──────────────────────────────────────────────────── VBLANK   │ capture
+/PCLK    ──────────────────────────────────────────────────── /PCLK    ┘ bus
+
+/TRANSPARENT (PPU2 p4)  ──────────┐
+                                  ├──[AND]────────────────── PIXEL_VALID
+/OVER        (PPU1 p94) ──────────┘
+
+PA0–PA7  (PPU2 p17–24) ──[8-input NOR]──ADDR_MATCH───┐
+                                                     ├──[AND]──WRITE_2100
+/PWR     (PPU2 p6)  ─────────────────────────────────┘            │
+                                                                  │ (clock)
+D0–D3    (PPU2 p12–15) ───────────────────────────────[74HC175]───┴────── Brightness[3:0]
+
+PALMODE  (PPU2 p30)  ──────────────────────────────────────────── PALMODE (optional)
 ```
+
+### Preprocessing Done on the Daughter Board
+
+
+| Operation              | Input                           | Output                | IC Required             |
+| ---------------------- | ------------------------------- | --------------------- | ----------------------- |
+| Address match          | PA0–PA7 (PPU2 pins 17–24)       | `ADDR_MATCH`          | 74HC4078 or NOR tree    |
+| Write strobe combine   | `ADDR_MATCH` + `/PWR`           | `WRITE_2100` clock    | AND gate                |
+| Brightness latch       | `WRITE_2100` clock + D0–D3      | 4 stable output lines | 74HC175 (4-bit latch)   |
+| Pixel validity combine | `/OVER` + `/TRANSPARENT`        | `PIXEL_VALID`         | AND gate                |
+| RGB bit reordering     | TST[4:0] per channel (reversed) | Correctly ordered RGB | PCB routing only (free) |
+
+
+### FPC Signal List
+
+The 18-signal capture bus must map to **contiguous GPIOs** on the RP2350 so the PIO can read the full word in a single instruction.
+
+#### Capture Bus (18 signals — must be contiguous GPIOs)
+
+
+| Bit | Signal   | Notes                                   |
+| --- | -------- | --------------------------------------- |
+| 17  | HBLANK   | PPU2 pin 25                             |
+| 16  | Red[4]   | TST4 (MSB), reordered on daughter board |
+| 15  | Red[3]   | TST3                                    |
+| 14  | Red[2]   | TST2                                    |
+| 13  | Red[1]   | TST1                                    |
+| 12  | Red[0]   | TST0 (LSB), reordered on daughter board |
+| 11  | Green[4] | TST9 (MSB), reordered                   |
+| 10  | Green[3] | TST8                                    |
+| 9   | Green[2] | TST7                                    |
+| 8   | Green[1] | TST6                                    |
+| 7   | Green[0] | TST5 (LSB), reordered                   |
+| 6   | Blue[4]  | TST14 (MSB), reordered                  |
+| 5   | Blue[3]  | TST13                                   |
+| 4   | Blue[2]  | TST12                                   |
+| 3   | Blue[1]  | TST11                                   |
+| 2   | Blue[0]  | TST10 (LSB), reordered                  |
+| 1   | /PCLK    | PPU2 pin 27                             |
+| 0   | VBLANK   | PPU2 pin 26                             |
+
+
+#### Additional Signals (5–6 signals)
+
+
+| Signal               | Notes                                                                                                                                              |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| PIXEL_VALID          | HIGH = pixel valid; LOW = transparent/Mode 7 overflow/sync. Combined from `/OVER` (PPU1 pin 94) AND `/TRANSPARENT` (PPU2 pin 4) on daughter board. |
+| Brightness[0]        | D0 latched (INIDISP bit 0)                                                                                                                         |
+| Brightness[1]        | D1 latched (INIDISP bit 1)                                                                                                                         |
+| Brightness[2]        | D2 latched (INIDISP bit 2)                                                                                                                         |
+| Brightness[3]        | D3 latched (INIDISP bit 3, MSB)                                                                                                                    |
+| PALMODE *(optional)* | PPU2 pin 30. Pass-through. Add if PAL support is required; otherwise detectable from VBLANK timing.                                                |
+
+
+### FPC Pin Count Summary
+
+
+| Group                | Signals |
+| -------------------- | ------- |
+| Capture bus          | 18      |
+| PIXEL_VALID          | 1       |
+| Brightness (latched) | 4       |
+| **Minimum total**    | **23**  |
+| PALMODE (optional)   | +1      |
+| **Full total**       | **24**  |
+
+
+### Audio (Optional — route via same FPC)
+
+If the daughter board is physically near the S-DSP, the audio signals can share the same FPC rather than running separate wires to the main board.
+
+
+| Signal | S-DSP Pin | Notes                 |
+| ------ | --------- | --------------------- |
+| SDATA  | 44        | Serial audio data     |
+| LRCK   | 43        | Left/right word clock |
+| BCLK   | 42        | Bit clock             |
+
+
+Adding audio brings the FPC to **26–27 pins** total.
 
 ---
 
