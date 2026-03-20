@@ -1,6 +1,6 @@
 # SuperPico Digital
 
-Digital-to-digital HDMI mod for 2-chip SNES consoles using the Raspberry Pi Pico 2 (RP2350).
+Digital-to-digital HDMI mod for 2-chip SNES consoles using the Raspberry Pi Pico 2 (RP2350B).
 
 ## Overview
 
