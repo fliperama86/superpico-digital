@@ -179,3 +179,7 @@
 
 ## Session Log - 2026-06-27 18:53 -03
 - User clarified that all `fp-info-cache` and KiCad backup artifacts should be git-ignored. Plan: update `.gitignore` and unstage matching generated files without deleting them.
+
+## Session Log - 2026-06-27 18:55 -03
+- Added `.gitignore` rules for KiCad generated artifacts: `**/fp-info-cache`, `**/*-backups/`, `**/.history/`, `**/*.bak`; unstaged existing generated backup/cache artifacts without deleting them.
+- Published branch `codex/audio-bringup-hardware-notes`, rebased on `origin/main`, commit `671838d` plus this memory note, draft PR: https://github.com/fliperama86/superpico-digital/pull/5. Build validation passed with `cmake --build build -j$(sysctl -n hw.ncpu)`.
