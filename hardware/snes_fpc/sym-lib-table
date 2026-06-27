@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "Snes")(type "KiCad")(uri "${KIPRJMOD}/Snes.kicad_sym")(options "")(descr ""))
+)

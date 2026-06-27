@@ -8,9 +8,12 @@
 
 #include "video/video_pipeline.h"
 #include "video/video_capture.h"
+#include "video/freq_counter.h"
 #include "video/snes_timing.h"
 #include "video/video_config.h"
 #include "config.h"
+
+#include "hardware/pio.h"
 
 #if ENABLE_AUDIO
 #include "audio/audio_pipeline.h"

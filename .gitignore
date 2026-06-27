@@ -15,3 +15,9 @@ compile_commands.json
 .obsidian
 tmp
 .cache
+
+# KiCad generated cache/backup artifacts
+**/fp-info-cache
+**/*-backups/
+**/.history/
+**/*.bak

@@ -73,4 +73,10 @@
 #define PIN_AUDIO_LRCK  23  // GP23 - S-DSP Pin 43 (word select / L-R clock)
 #define PIN_AUDIO_BCLK  24  // GP24 - S-DSP Pin 42 (bit clock)
 
+// =============================================================================
+// S-DSP Control Signals - GP6-7
+// =============================================================================
+#define PIN_AUDIO_DCK    6  // GP6  - S-DSP Pin 78 (master clock, 8.192 MHz)
+#define PIN_AUDIO_RESET  7  // GP7  - S-DSP Pin 47 (/RESET, active-low)
+
 #endif // SNES_PINS_H

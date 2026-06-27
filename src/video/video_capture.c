@@ -1,4 +1,5 @@
 #include "video_capture.h"
+#include "freq_counter.h"
 #include "hardware/dma.h"
 #include "hardware/pio.h"
 #include "pico/stdlib.h"
@@ -126,6 +127,7 @@ void video_capture_run(void) {
     if (g_frame_count % 60 == 0) {
       gpio_xor_mask(1ul << PICO_DEFAULT_LED_PIN);
     }
+    // freq_counter_update(); // TODO: enable after debugging
 
     // 2. Lightweight PIO reset — JMP back to wrap_target (skips pull/mov y)
     pio_sm_set_enabled(g_pio_snes, g_sm_pixel, false);

@@ -21,6 +21,9 @@
 #include "i2s_capture.h"
 #include "src.h"
 #include "snes_pins.h"
+#include "video/freq_counter.h"
+
+#include "hardware/gpio.h"
 
 #include <string.h>
 
@@ -32,6 +35,7 @@ enum {
     AUDIO_STATE_INIT,       // Initialize PIO + DMA
     AUDIO_STATE_WARM,       // Capture running, output muted
     AUDIO_STATE_RUNNING,    // Normal operation
+    AUDIO_STATE_RESET,      // S-DSP /RESET asserted — pipeline stopped
 };
 
 #define AUDIO_HSTX_SETTLE_FRAMES 120  // ~2s at 60fps
@@ -61,31 +65,41 @@ static struct {
 
 static const audio_sample_t audio_silence[4] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
 
-// Drift compensation — adjust SRC input rate based on DI queue level
-// (matches neopico-hd's audio_background_task_control)
+// Rate tracking — use DCK measurement when available, fall back to drift compensation
 #define DRIFT_CHECK_INTERVAL 30  // frames (~0.5s at 60fps)
 #define DRIFT_RATE_STEP      10  // Hz adjustment per check
-#define DRIFT_QUEUE_TARGET  128  // half of 256
 #define DRIFT_QUEUE_HIGH    160
 #define DRIFT_QUEUE_LOW      96
 #define DRIFT_RATE_MIN    30000  // SNES ~32kHz ±5%
 #define DRIFT_RATE_MAX    34000
 
+// Valid DCK range: 8.192 MHz ±5%
+#define DCK_FREQ_MIN  7782000
+#define DCK_FREQ_MAX  8601000
+
 static uint32_t last_drift_frame;
 
-static void drift_compensate(void)
+static void update_src_rate(void)
 {
     if (video_frame_count - last_drift_frame < DRIFT_CHECK_INTERVAL)
         return;
     last_drift_frame = video_frame_count;
 
+    // Prefer DCK-derived rate if available
+    uint32_t dck = freq_dck_hz;
+    if (dck >= DCK_FREQ_MIN && dck <= DCK_FREQ_MAX) {
+        g_pipeline.src.input_rate = dck / 256;
+        return;
+    }
+
+    // Fallback: drift compensation from DI queue level
     uint32_t level = hstx_di_queue_get_level();
     uint32_t rate = g_pipeline.src.input_rate;
 
     if (level > DRIFT_QUEUE_HIGH)
-        rate += DRIFT_RATE_STEP;  // Queue filling up — speed up consumption
+        rate += DRIFT_RATE_STEP;
     else if (level < DRIFT_QUEUE_LOW)
-        rate -= DRIFT_RATE_STEP;  // Queue draining — slow down consumption
+        rate -= DRIFT_RATE_STEP;
 
     if (rate < DRIFT_RATE_MIN) rate = DRIFT_RATE_MIN;
     if (rate > DRIFT_RATE_MAX) rate = DRIFT_RATE_MAX;
@@ -149,6 +163,19 @@ static void audio_do_process(void)
         audio_output_callback(out_buf, out_count);
 }
 
+static void audio_reset_gpio_init(void)
+{
+    gpio_init(PIN_AUDIO_RESET);
+    gpio_set_dir(PIN_AUDIO_RESET, GPIO_IN);
+    gpio_pull_up(PIN_AUDIO_RESET);
+    gpio_set_input_hysteresis_enabled(PIN_AUDIO_RESET, true);
+}
+
+static inline bool audio_reset_active(void)
+{
+    return !gpio_get(PIN_AUDIO_RESET);  // Active-low
+}
+
 static void audio_hw_init(void)
 {
     ap_ring_init(&g_pipeline.capture_ring);
@@ -175,6 +202,7 @@ void audio_pipeline_init(void)
     g_pipeline.state = AUDIO_STATE_WAIT_HSTX;
     g_pipeline.output_muted = true;
     g_pipeline.initialized = true;
+    audio_reset_gpio_init();
 }
 
 // Background task — called from Core 1 via video_output_set_background_task.
@@ -184,9 +212,25 @@ void __scratch_x("") audio_pipeline_process(void)
     if (!g_pipeline.initialized)
         return;
 
+    // Check /RESET in any active state
+    if (g_pipeline.state >= AUDIO_STATE_INIT && audio_reset_active()) {
+        if (g_pipeline.state >= AUDIO_STATE_WARM) {
+            i2s_capture_stop(&g_pipeline.capture);
+        }
+        g_pipeline.output_muted = true;
+        g_pipeline.collect_count = 0;
+        g_pipeline.state = AUDIO_STATE_RESET;
+    }
+
     switch (g_pipeline.state) {
         case AUDIO_STATE_WAIT_HSTX:
             if (video_frame_count >= AUDIO_HSTX_SETTLE_FRAMES)
+                g_pipeline.state = AUDIO_STATE_INIT;
+            break;
+
+        case AUDIO_STATE_RESET:
+            // Wait for /RESET to deassert
+            if (!audio_reset_active())
                 g_pipeline.state = AUDIO_STATE_INIT;
             break;
 
@@ -212,7 +256,7 @@ void __scratch_x("") audio_pipeline_process(void)
             break;
 
         case AUDIO_STATE_RUNNING:
-            drift_compensate();
+            update_src_rate();
             audio_do_process();
             while (ap_ring_available(&g_pipeline.capture_ring) > 0)
                 audio_do_process();

@@ -98,3 +98,84 @@
   - **PIO SM**: Detects /PWR low + ADDR_MATCH high, latches D[3:0] as g_brightness (0–15).
   - **Software**: Apply (color * brightness) / 15 per channel, either via LUT rebuild or scanline callback.
 - Action blocked on hardware feasibility (can the 74HC4078 be added to current layout?).
+
+## S-DSP Pin 47 Research — 2026-03-22
+- **Pin 47 = /RESET** (active-low reset input from system)
+- Per nocash fullsnes and jwdonal pinout (GameSX PDF), pin 47 is NOT an audio signal.
+- The GameSX S/PDIF mod page (av:snes_sp_dif) confusingly labels the CS8405A encoder pin connections with S-DSP pin numbers, which can cause misreadings if skimmed.
+- Actual S-DSP audio output pins (DAC serial interface to uPD6376):
+  - Pin 42 = BCK (bit clock, ~1.536 MHz = 24.576MHz / 16)
+  - Pin 43 = LRCK (left/right clock, ~32 kHz = 24.576MHz / 16 / 48)
+  - Pin 44 = DATA (serial audio data, 16-bit right-justified in 24-bit frames)
+- Existing SNES digital audio mods (qwertymodo SNES/PDIF, Alpha-II) tap pins 42/43/44 and feed them to a CS8405A S/PDIF transmitter.
+- Pin 78 = 8.192 MHz clock, used as OMCK (master clock) input to CS8405A in some mods.
+
+## Session Log - 2026-06-27 16:14 -03
+- User requested build and flash. Checked project memory and pi-flash procedure.
+- Ran `cmake --build build -j$(sysctl -n hw.ncpu)`: build succeeded. Fresh UF2: `build/src/superpico-digital.uf2`.
+- Awaiting operator acknowledgement before hardware-affecting flash command: `pi flash build/src/superpico-digital.uf2`.
+
+## Session Log - 2026-06-27 16:16 -03
+- Operator acknowledged ready. Ran `pi flash build/src/superpico-digital.uf2`.
+- Flash failed: no accessible RP-series devices in BOOTSEL mode after reboot/load retries. Next step: operator should connect board or hold BOOTSEL/reset as needed, then acknowledge before retrying same command.
+
+## Session Log - 2026-06-27 16:16 -03
+- User requested retry. Ran `pi flash build/src/superpico-digital.uf2` again.
+- Flash succeeded: RP2350 device was in BOOTSEL mode, UF2 loaded to flash, rebooted into application mode, Done.
+
+## Session Log - 2026-06-27 16:21 -03
+- After successful flash, user reported HDMI image is pure garbage, semi-random blue noise. Treat as likely video capture alignment/pin/config regression, not yet changed code.
+
+## Session Log - 2026-06-27 16:24 -03
+- Inspected diffs after blue-noise report. Current video capture source is effectively same as HEAD; uncommitted changes are mostly audio/DCK includes and GP6/GP7 reset handling.
+- Symptom analysis: gray fill would mean no committed capture lines, but blue/random image suggests timing signals are active and RGB/TST data is wrong/floating or PIO is sampling wrong pins.
+- Checked SDK RP2350 PIO definitions: GPIOBASE offset 0x168 and IN_BASE mask 0x000f8000 remain correct. Need next test: flash a known-good video-only/history build or add a flag-gated diagnostic pattern/signal mode.
+
+## Session Log - 2026-06-27 16:30 -03
+- User approved baseline test. Created detached temp worktree `/Users/dudu/Projects/superpico-digital-baseline-ee963bd` at commit `ee963bd` (Full color cap working docs point).
+- Initialized historical submodule `lib/pico_hdmi` to `ca5125ab...` in temp worktree only. Configured and built successfully.
+- Baseline UF2: `/Users/dudu/Projects/superpico-digital-baseline-ee963bd/build/src/superpico-digital.uf2`, sha256 `f0cf76691ba70b7440c18bd9bdff54408e103af2ab1b32bd042f67e0b902eae5`. Awaiting operator ack before flashing.
+
+## Session Log - 2026-06-27 16:32 -03
+- Operator acknowledged ready. Flashed baseline UF2 from temp worktree `ee963bd` using `pi flash /Users/dudu/Projects/superpico-digital-baseline-ee963bd/build/src/superpico-digital.uf2`.
+- Flash succeeded: device rebooted via USB serial into BOOTSEL, loaded firmware, rebooted to application. Awaiting user visual result.
+
+## Session Log - 2026-06-27 16:56 -03
+- User requested `flash again` after baseline test flash. Need fresh operator acknowledgement before rerunning exact hardware-affecting command: `pi flash /Users/dudu/Projects/superpico-digital-baseline-ee963bd/build/src/superpico-digital.uf2`.
+
+## Session Log - 2026-06-27 16:57 -03
+- User corrected workflow preference: when they directly ask to flash and the UF2 target is clear, do not ask for another confirmation. Treat the flash request itself as the operator acknowledgement for the previously identified exact `pi flash` command.
+- Ran baseline flash command immediately after correction: `pi flash /Users/dudu/Projects/superpico-digital-baseline-ee963bd/build/src/superpico-digital.uf2`.
+
+## Session Log - 2026-06-27 17:21 -03
+- User confirmed baseline flash works. This suggests current bad blue-noise build/regression was not hardware-only.
+- User asked how to wire audio from SHVC using TRC digital audio mod reference. Product SHVC image shows top sound-module vias left-to-right: DSP47, DSP44, DSP43, DSP42; separate lower via: DSP78. Map to SuperPico: DSP44 SDATA->GP22, DSP43 LRCK->GP23, DSP42 BCLK->GP24, optional DSP78 DCK->GP6, optional DSP47 /RESET->GP7.
+
+## Session Log - 2026-06-27 18:18 -03
+- User confirmed audio wired and requested flashing audio-enabled version. Current source has ENABLE_AUDIO=1 and audio capture pins GP22 SDATA, GP23 LRCK, GP24 BCLK, optional GP6 DCK, GP7 /RESET.
+- Built current main-tree firmware with `cmake --build build -j$(sysctl -n hw.ncpu)`: succeeded. Flashed fresh `build/src/superpico-digital.uf2` via `pi flash`.
+
+## Session Log - 2026-06-27 18:19 -03
+- User reported current audio-capture firmware works fine and clean. Dev suggested an alternate I2S PIO loop that skips 8 BCLKs, captures 16 bits on BCLK falling edges with a nop, pushes each channel, waits LRCK transition between channels. Need compare against current PIO before considering changes.
+
+## Session Log - 2026-06-27 18:32 -03
+- User reported audio initially seemed fine/clean, then started hearing split-second subtle crackling/popping. Likely intermittent buffer/SRC scheduling or rare I2S framing glitch, not complete wiring failure. No code changes yet.
+
+## Session Log - 2026-06-27 18:33 -03
+- Audio pop hypothesis after code inspection: current DCK-derived rate path is effectively inactive because `freq_dck_hz` is never updated in current main path, so SRC uses DI-queue drift fallback. Also `audio_output_callback()` can drop generated samples if HDMI DI queue is full, which would sound like short crackles/pops. Recommended first experiment: flag-gated DI-queue throttle/no-drop behavior and optional reset debounce/ignore before changing I2S edge/PIO.
+
+## Session Log - 2026-06-27 18:36 -03
+- Researched open/reference SNES digital audio mods. TheRetroChannel Lectronz V2 page lists no code/documentation links, but states the known issue: SNES can pause the digital audio stream during silence/no-audio, sometimes multiple times per second/mid-song, causing receiver dropouts.
+- Useful references found: Alpha-II/GameSX SNES S/PDIF docs and Qwertymodo SNES/PDIF docs. They confirm S-DSP mapping: DSP47 reset, DSP43 LRCK ~32 kHz, DSP42 BCLK ~1.536 MHz, DSP44 DATA, DSP78 OMCK/DCK 8.192 MHz. Qwertymodo emphasizes short noisy serial lines to avoid drop-out.
+- Implication for our HDMI capture: handle possible SNES audio stream pauses/framing gaps gracefully; use DCK-derived rate if possible; do not consume/drop samples when HDMI DI queue is full.
+
+## Session Log - 2026-06-27 18:40 -03
+- User reported important update: after resetting the Pico itself, the audio artifact disappeared. This matches a prior NeoPico-HD issue. Need inspect `/Users/dudu/Projects/neogeo/neopico-hd` for comparable audio/reset handling.
+
+## Session Log - 2026-06-27 18:41 -03
+- Inspected `/Users/dudu/Projects/neogeo/neopico-hd` for audio-reset analogy. NeoPico docs have known issue: intermittent scratched/corrupted audio on cold power-up, later Pico reset/capture relock clears it. Hypothesis there: I2S capture can lock with bad startup phase/alignment during power transients.
+- NeoPico mitigations now default ON: `NEOPICO_EXP_AUDIO_STARTUP_REARM` one-shot stop/restart I2S PIO/DMA after muted warmup; `NEOPICO_EXP_AUDIO_FRAME_RESYNC` PIO re-syncs to WS every stereo frame; `NEOPICO_EXP_AUDIO_REARM_ON_VIDEO_REACQUIRE`; and a more intrusive `NEOPICO_EXP_FIRST_BOOT_REBOOT` cold-boot watchdog reboot.
+- For SuperPico, user observation that Pico reset clears SNES audio popping strongly favors startup I2S/HDMI-audio state issue over steady-state drift. Recommended first port: flag-gated one-shot audio rearm after warmup plus frame-resync PIO variant, before full cold-boot auto-reboot.
+
+## Session Log - 2026-06-27 18:53 -03
+- User clarified that all `fp-info-cache` and KiCad backup artifacts should be git-ignored. Plan: update `.gitignore` and unstage matching generated files without deleting them.
