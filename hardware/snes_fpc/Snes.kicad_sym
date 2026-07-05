@@ -907,7 +907,7 @@
 			(pin power_out line
 				(at 3.81 -34.29 90)
 				(length 2.54)
-				(name "5V"
+				(name "+5V"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -1005,6 +1005,25 @@
 					)
 				)
 				(number "15"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin power_out line
+				(at -1.27 -34.29 90)
+				(length 2.54)
+				(hide yes)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "16"
 					(effects
 						(font
 							(size 0.762 0.762)
@@ -1573,7 +1592,7 @@
 			(pin power_out line
 				(at 1.27 -34.29 90)
 				(length 2.54)
-				(name "5V"
+				(name "+5V_EXT"
 					(effects
 						(font
 							(size 1.27 1.27)

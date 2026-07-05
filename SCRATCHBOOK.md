@@ -183,3 +183,52 @@
 ## Session Log - 2026-06-27 18:55 -03
 - Added `.gitignore` rules for KiCad generated artifacts: `**/fp-info-cache`, `**/*-backups/`, `**/.history/`, `**/*.bak`; unstaged existing generated backup/cache artifacts without deleting them.
 - Published branch `codex/audio-bringup-hardware-notes`, rebased on `origin/main`, commit `671838d` plus this memory note, draft PR: https://github.com/fliperama86/superpico-digital/pull/5. Build validation passed with `cmake --build build -j$(sysctl -n hw.ncpu)`.
+
+## Session Log - 2026-07-05 15:45 -03
+- User asked what PPU2 `/PWR` is and whether it is 5V. Answered: PPU2 pin 6 `/PWR`/`PAWR` is the active-low 5A22 B-bus write strobe, not a power rail. It is 5V TTL logic in SNES context, normally high and pulses low on PPU writes; do not connect directly to RP2350 GPIO without level shifting.
+
+## Session Log - 2026-07-05 15:52 -03
+- User asked to remove the edge clearance rule on the FPC. Changed `hardware/snes_fpc/snes_fpc.kicad_pro`: `rule_severities.copper_edge_clearance` from `error` to `ignore`, and `rules.min_copper_edge_clearance` from `0.5` to `0.0`. Validated `.kicad_pro` parses as JSON. Existing unrelated KiCad/FPC uncommitted edits were present and left untouched.
+
+## Session Log - 2026-07-05 16:45 -03
+- User requested DRC rule changes for FPC: set actual DRC `rules.min_via_diameter` to `0.4` and `rules.min_copper_edge_clearance` to `0.0` in `hardware/snes_fpc/snes_fpc.kicad_pro`. Validated JSON and ran KiCad 10.0.1 CLI DRC on `hardware/snes_fpc/snes_fpc.kicad_pcb`.
+- DRC still reports 123 violations plus 11 unconnected items: 66 `drill_out_of_range` errors from 0.15/0.25 mm holes vs min hole 0.3 mm, 53 `copper_edge_clearance` errors because J1 pads overlap/cross Edge.Cuts so 0 mm clearance is insufficient, 1 via-to-via clearance error, and 3 footprint mismatch warnings.
+- Temporary copy probe showed that ignoring `copper_edge_clearance` and lowering `min_through_hole_diameter` to 0.15 clears the edge and drill groups, leaving 1 clearance error, 3 footprint mismatch warnings, and 11 unconnected items. Did not apply those extra changes to repo.
+
+## Session Log - 2026-07-05 16:47 -03
+- User confirmed copper edge clearance errors should be cleared. Changed `hardware/snes_fpc/snes_fpc.kicad_pro` `rule_severities.copper_edge_clearance` from `error` to `ignore`, while keeping `rules.min_copper_edge_clearance = 0.0` and `rules.min_via_diameter = 0.4`.
+- Reran KiCad 10.0.1 CLI DRC. Result: 70 violations plus 11 unconnected items. `copper_edge_clearance` count is now 0. Remaining violations: 66 `drill_out_of_range`, 3 `lib_footprint_mismatch` warnings, 1 normal `clearance` error.
+
+## Session Log - 2026-07-05 16:50 -03
+- User requested changing PTH hole minimum size to 0.15 mm. Updated `hardware/snes_fpc/snes_fpc.kicad_pro` `rules.min_through_hole_diameter` from `0.3` to `0.15`.
+- Reran KiCad 10.0.1 CLI DRC. Result: 4 violations plus 11 unconnected items. `drill_out_of_range` count is now 0 and `copper_edge_clearance` count remains 0. Remaining violations: 1 normal `clearance` error and 3 `lib_footprint_mismatch` warnings.
+
+## Session Log - 2026-07-05 16:59 -03
+- User asked why GND fill zone does not reach GND pins despite apparent clear path. Inspected `hardware/snes_fpc/snes_fpc.kicad_pcb`: the single GND zone uses local `(connect_pads (clearance 0.5))`, `min_thickness 0.25`, `thermal_gap 0.5`, `thermal_bridge_width 0.5`, and `island_removal_mode 0`.
+- Temp-copy DRC with `--refill-zones --save-board` reduced unconnected items from 11 to 3, so saved filled polygons are stale after recent edits. Remaining GND issue showed starved thermal / isolated zone behavior around U3/U4.
+- Temp-copy probe with solid zone pad connection (`connect_pads yes`, clearance 0.2) cleared the U4 GND missing-connection/starved-thermal issue, leaving only non-GND +5V and a zone-island unconnected item. No repo changes made.
+
+## Session Log - 2026-07-05 17:40 -03
+- User approved applying the GND zone fix. Updated `hardware/snes_fpc/snes_fpc.kicad_pcb` single GND zone to solid pad connection: `(connect_pads yes (clearance 0.2))`, `thermal_gap 0.2`, `thermal_bridge_width 0.25`; then ran KiCad 10.0.1 CLI DRC with `--refill-zones --save-board` to refresh filled polygons.
+- DRC result after update: 4 violations plus 2 unconnected items. No starved thermal entries and no GND pad missing-connection entries remain. Remaining: 1 PA0/HBLANK clearance error, 3 footprint mismatch warnings, +5V unconnected, and a GND zone-to-zone island unconnected item.
+
+## Session Log - 2026-07-05 17:43 -03
+- User asked what the remaining DRC error is. It is a 0.2 mm clearance violation with actual 0.1652 mm between J1 PTH pad 24 `PA0` at approx `(96.5, 94.3)` and a B.Cu `HBLANK` track near `(93.202, 92.602)`, specifically the HBLANK route approaching pad 25. Short by about 0.035 mm.
+
+## Session Log - 2026-07-05 17:52 -03
+- User asked to check DRC again. Ran KiCad 10.0.1 CLI DRC with `--refill-zones` only, no save. Current report: 3 violations, all `lib_footprint_mismatch` warnings for U3, U4, and J2. No clearance errors remain.
+- Current unconnected items: 2. One +5V connection gap between two +5V F.Cu tracks near `(95.15,77.95)` and `(102.925,75.975)`, and one GND zone-to-zone island unconnected item.
+
+## Session Log - 2026-07-05 17:56 -03
+- User asked why `+5V` unconnected remains if it comes from the IC. Diagnosis: KiCad sees two same-net `+5V` copper islands with no on-board copper connection. Left island is around via `(95.15,77.95)` feeding logic VCC and J1 pin 5; right/top island is around J1 pins 93/94 with track near `(102.925,75.975)`. KiCad does not count the PPU2/console motherboard/IC internals as a PCB connection.
+
+## Session Log - 2026-07-05 17:58 -03
+- User clarified it makes no sense to connect the remaining `+5V` PCB islands because they are already connected internally/off-board. Agreed: this is a KiCad board-level connectivity model limitation. Recommended clearing via specific DRC exclusion or splitting into distinct externally-common nets with a schematic note, not adding copper solely for DRC.
+
+## Session Log - 2026-07-05 18:00 -03
+- User asked whether the intentional off-board/internal `+5V` connection can be handled by updating symbol/schematic. Answer: yes, avoid putting externally-common pads on the same PCB net unless this board must connect them. Recommended: keep only the power source pad used by local logic on `+5V`; mark other internally/off-board-tied PPU2 power pads no-connect or assign separate external-only nets with schematic notes. Pin type changes alone do not satisfy KiCad PCB connectivity.
+
+## Session Log - 2026-07-05 18:25 -03
+- User asked to fix the intentional off-board/internal `+5V` KiCad model issue via schematic/symbol. Split J1 pins 93/94 from global `+5V` onto a new `PPU2_5V_EXT` net in `hardware/snes_fpc/snes_fpc.kicad_sch`, preserving their local tie to each other but no longer tying them to J1 pin 5/local logic `+5V` in the schematic.
+- Updated embedded/external PPU2 symbol pin 94 display name from `+5V`/`5V` to `+5V_EXT`; J1 pin 5 remains `+5V`. Updated PCB pad 93/94 and their short local copper tie to net `PPU2_5V_EXT`.
+- Verified schematic netlist: `+5V` has J1 pin 5 only; `PPU2_5V_EXT` has J1 pins 93 and 94. KiCad DRC with zones refilled now reports 3 footprint mismatch warnings and 0 unconnected items. DRC with schematic parity additionally reports 2 existing J2 mounting-pad schematic parity warnings.
