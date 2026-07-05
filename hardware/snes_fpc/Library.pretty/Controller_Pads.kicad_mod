@@ -1,0 +1,105 @@
+(footprint "Controller_Pads"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0 2 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(hide yes)
+		(uuid "b1d2d6d1-b1aa-48bb-a80f-c2924d96277f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "Audio Pads"
+		(at 0 -4.3 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "bd94d9e3-1df1-4697-acc8-18f0385567b4")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "fb733013-a005-4cd7-b02b-282b22098d06")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "7a28cb71-e880-4333-a150-40dc3860ecdd")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_text user "A1"
+		(at -0.5 2.8 90)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "dc3ab857-c839-43b6-9a06-143100c3a85f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(fp_text user "A2"
+		(at 1.6 2.9 90)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "a2718d88-3c48-4ef6-a469-fc8fbe13dea0")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify left bottom)
+		)
+	)
+	(pad "1" thru_hole roundrect
+		(at -1.1 0 270)
+		(size 1.875 1.25)
+		(drill 0.5)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(roundrect_rratio 0.15)
+		(uuid "a606e6d5-f8b3-49d0-bec1-bb8626b8f9d3")
+	)
+	(pad "2" thru_hole roundrect
+		(at 1 0 270)
+		(size 1.875 1.25)
+		(drill 0.5)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(roundrect_rratio 0.15)
+		(uuid "6938fce4-c81f-4cab-8c57-cf54f06b6d16")
+	)
+	(embedded_fonts no)
+)
