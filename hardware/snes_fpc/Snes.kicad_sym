@@ -905,6 +905,24 @@
 				)
 			)
 			(pin power_out line
+				(at 3.81 -34.29 90)
+				(length 2.54)
+				(name "5V"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin power_out line
 				(at -25.4 19.05 0)
 				(length 2.54)
 				(name "PWR"

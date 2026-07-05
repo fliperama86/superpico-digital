@@ -2318,6 +2318,24 @@
 					)
 				)
 				(pin power_out line
+					(at 3.81 -34.29 90)
+					(length 2.54)
+					(name "5V"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 0.762 0.762)
+							)
+						)
+					)
+				)
+				(pin power_out line
 					(at -25.4 19.05 0)
 					(length 2.54)
 					(name "PWR"
@@ -3277,6 +3295,12 @@
 			(embedded_fonts no)
 		)
 	)
+	(junction
+		(at 97.79 90.17)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f0fd7884-c5b3-4884-bf60-8587f00e629f")
+	)
 	(no_connect
 		(at 269.24 44.45)
 		(uuid "011b0dc5-9f2f-41d0-a41b-77dbea3c4fb5")
@@ -3303,6 +3327,16 @@
 	)
 	(wire
 		(pts
+			(xy 100.33 90.17) (xy 97.79 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "27ef0930-5e5d-467a-a5e1-dc3c168ac9b1")
+	)
+	(wire
+		(pts
 			(xy 77.47 24.13) (xy 78.74 24.13)
 		)
 		(stroke
@@ -3310,6 +3344,26 @@
 			(type default)
 		)
 		(uuid "3cdcb8fd-7ecb-4472-b7e6-9e1efd653024")
+	)
+	(wire
+		(pts
+			(xy 97.79 90.17) (xy 95.25 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9855c6d9-0778-4994-a7a2-5a2791b62f12")
+	)
+	(wire
+		(pts
+			(xy 100.33 93.98) (xy 100.33 90.17)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9f4490f1-b467-4cf3-9d5b-9b7f8dcee49a")
 	)
 	(wire
 		(pts
@@ -6058,6 +6112,9 @@
 		(pin "94B"
 			(uuid "72cc3f13-260d-4165-95d6-4b94a7a22568")
 		)
+		(pin "5"
+			(uuid "f340c14c-4453-4f4a-9390-425690a49fc2")
+		)
 		(instances
 			(project "snes_fpc"
 				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
@@ -7131,7 +7188,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 95.25 90.17 270)
+		(at 100.33 93.98 270)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -7142,7 +7199,7 @@
 		(fields_autoplaced yes)
 		(uuid "9f302cb8-bf35-4405-90a6-fabee2c8aa1a")
 		(property "Reference" "#PWR02"
-			(at 91.44 90.17 0)
+			(at 96.52 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7153,7 +7210,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 99.06 90.1699 90)
+			(at 104.14 93.9799 90)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -7164,7 +7221,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 95.25 90.17 0)
+			(at 100.33 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7175,7 +7232,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 95.25 90.17 0)
+			(at 100.33 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7186,7 +7243,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 95.25 90.17 0)
+			(at 100.33 93.98 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
