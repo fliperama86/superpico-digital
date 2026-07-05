@@ -232,3 +232,35 @@
 - User asked to fix the intentional off-board/internal `+5V` KiCad model issue via schematic/symbol. Split J1 pins 93/94 from global `+5V` onto a new `PPU2_5V_EXT` net in `hardware/snes_fpc/snes_fpc.kicad_sch`, preserving their local tie to each other but no longer tying them to J1 pin 5/local logic `+5V` in the schematic.
 - Updated embedded/external PPU2 symbol pin 94 display name from `+5V`/`5V` to `+5V_EXT`; J1 pin 5 remains `+5V`. Updated PCB pad 93/94 and their short local copper tie to net `PPU2_5V_EXT`.
 - Verified schematic netlist: `+5V` has J1 pin 5 only; `PPU2_5V_EXT` has J1 pins 93 and 94. KiCad DRC with zones refilled now reports 3 footprint mismatch warnings and 0 unconnected items. DRC with schematic parity additionally reports 2 existing J2 mounting-pad schematic parity warnings.
+
+## Session Log - 2026-07-05 18:53 -03
+- User asked to find suitable LCSC ICs and add fabrication metadata. Added hidden sourcing fields to `hardware/snes_fpc/snes_fpc.kicad_sch` for U1-U4: Manufacturer, Manufacturer Part, MPN, Supplier, Supplier Part, LCSC/LCSC Part variants, JLCPCB Part #, JLCPCB Part Type, LCSC Part Name, Supplier URL, and datasheet links.
+- Selected U1 `SN74HC175PWR` / LCSC `C2682067` for TSSOP-16, U3/U4 `SN74AHC1G08DBVR` / LCSC `C7467` for SOT-23-5, and U2 `CD4078BPWR` / LCSC `C2682016` for TSSOP-14.
+- U2 sourcing caveat: current LCSC/JLC TSSOP-14 candidate is CD4078B 4000B family, pin-compatible OR/NOR but slower than the schematic value `74HC4078`; added a hidden Sourcing Note on U2 so this is visible in BOM exports.
+- Verified KiCad 10.0.1 schematic netlist export succeeds. Exported a temp BOM with metadata columns and confirmed U1-U4 fields appear. Netlist check still shows `+5V` on J1 pin 5 plus local IC VCC pins, and `PPU2_5V_EXT` on J1 pins 93/94 only.
+
+## Session Log - 2026-07-05 18:58 -03
+- Correction: the first broad schematic rewrite attempt produced unexpected large coordinate churn in `snes_fpc.kicad_sch`. Restored the schematic from git and reapplied only targeted U1-U4 metadata changes, reducing the schematic diff to metadata/datasheet fields only.
+- Re-verified KiCad netlist export and temp BOM export after the targeted patch. `+5V` / `PPU2_5V_EXT` split remains correct.
+
+## Session Log - 2026-07-05 19:01 -03
+- User corrected that the `74HC4078`/U2 LCSC choice appears out of stock. Need re-check current LCSC/JLC availability before changing U2 metadata again.
+
+## Session Log - 2026-07-05 19:20 -03
+- User asked for a full review of the snes_fpc design ("will it work? is the FPC good?"). Read-only review; no design files changed (KiCad lock files present, user has it open).
+- Verified netlist against docs/SNES_Digital_AV_Mod_Pin_Reference.md: J1 pin mapping matches exactly (4=/TRANSPARENT, 5=+5V, 6=/PWR, 12-15=D3-D0, 17-24=PA7-PA0, 25/26/27=HBLANK/VBLANK/PCLK, 77-92=TST0-14 w/ 83=+5V skip, 93=DVE tied to 94=+5VA, 99/16=GND). Logic verified: U2 NOR(PA0-7)=ADDR_MATCH, U3 AND(/PWR)=WRITE_2100 clock, U1 '175 latches D0-3 to BRT0-3, U4 AND(/TRANSPARENT,/OVER)=PIXEL_VALID. All correct per design intent.
+- IMPORTANT: docs/SNES_2-Chip_PPU2_5C78.md pin table CONTRADICTS the mod reference doc and shmups thread (e.g. claims 1-8=D0-D7, 20=/PAWR, 35=PCLK). It appears hallucinated/wrong. Thread anchors (93=TST15/DVE, 90-92=TST12-14, 37/50=/OVER1/2) support the schematic. Recommend fixing or deleting that doc.
+- Footprint geometry verified: 0.65mm pitch, pin-tip span 17.3mm (correct for 14x20 QFP100), dual TH+SMD pads for pins 90-93 (anticipates lifted pins), tail 30.6mm below top row with pads 93B/94B/95B for PPU1 (/PCLKOUT, /OVER, FIELD); only 94B wired (OVER). J2 FFC pads identical to KiCad lib (mismatch warning cosmetic). ERC 0, DRC 3 benign warnings, 0 unconnected.
+- JLCPCB flex capability check (web): via diameter >= hole+0.2 (0.25 recommended) - board's 0.4/0.15, 0.5/0.25, 0.6/0.3 vias all OK; 0.2mm traces OK; copper-to-edge >=0.3mm VIOLATED intentionally by 53 J1 pads (expect DFM email; add order note); stiffener NOT specified - recommend FR4 stiffener under J2 at order time.
+- Issues found: (1) NO decoupling caps anywhere - recommend 100nF per IC (U1-U4) before ordering; (2) production/bom.csv has empty LCSC column - schematic sourcing fields added after last PCB save; must sync PCB from schematic and re-export via Fabrication Toolkit; (3) CD4078B (U2 substitute) tpd ~125-250ns@5V - typical case OK (slow NOR actually suppresses false CP edge), worst corner could latch garbage; firmware mitigation: accept BRT change only when two consecutive HBLANK samples agree; (4) install prerequisite: PPU2 pin 93 factory-tied to GND on some revisions - MUST be isolated/lifted before flex install or 93-94 copper tie shorts +5V to GND; pins 90-92 may also need lifting per board revision; (5) minor: symbol pin 80 named "TST2" should be "TST3" (net R3 correct, cosmetic).
+- Verdict shared with user: design is electrically sound and fab-ready after caps + BOM sync; install requires pin-93 isolation.
+
+## Session Log - 2026-07-05 19:07 -03
+- Rechecked U2 sourcing after user noted `74HC4078` stock issue. Exact HC-family 4078 remains the stock concern; JLCPCB lists `CD4078BPWR` / `C2682016` as Extended SMT assembly, TSSOP-14, in stock, with 110 ns @ 15 V, 50 pF description.
+- Updated U2 displayed Value from `74HC4078` to `CD4078B` so the schematic/BOM no longer suggests ordering the out-of-stock exact HC part. Kept the hidden Sourcing Note warning that CD4078B is 4000B family and slower than 74HC4078.
+- Also found `SN74HC688PWR` / `C132045` as an in-stock high-speed HC TSSOP-20 comparator option, but it requires schematic/PCB redesign and is not pin-compatible with the current U2 TSSOP-14 footprint.
+
+## Session Log - 2026-07-05 19:16 -03
+- User asked whether U2 needs to be faster than CD4078B. Inspected local schematic/docs: U2 decodes PA0-PA7 == `$00` for `$2100` brightness writes, U3 combines address match with `/PWR`, and U1 latches D0-D3 on the resulting pulse.
+- Timing judgment: CD4078B is risky for production because CD4000 delay is hundreds of ns at 5 V, while this latch depends on address decode settling around the SNES B-bus `/PWR` write edge. A missed or late latch would break brightness fades/HDMA brightness updates.
+- Better direction: use a fast HC comparator such as `SN74HC688PWR` / LCSC `C132045` (TSSOP-20, in stock, typical tpd 14 ns) tied against zero, and replace U3 with a pin-compatible SOT-23-5 OR gate so the active-low equality output and active-low `/PWR` produce the same positive clock edge.

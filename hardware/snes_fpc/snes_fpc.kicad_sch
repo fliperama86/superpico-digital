@@ -1415,6 +1415,162 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:C_Small_US"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.254)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "C"
+				(at 0.254 1.778 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "C_Small_US"
+				(at 0.254 -2.032 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "capacitor, small US symbol"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "cap capacitor"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "C_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "C_Small_US_0_1"
+				(polyline
+					(pts
+						(xy -1.524 0.508) (xy 1.524 0.508)
+					)
+					(stroke
+						(width 0.3048)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start -1.524 -0.762)
+					(mid 0 -0.3734)
+					(end 1.524 -0.762)
+					(stroke
+						(width 0.3048)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "C_Small_US_1_1"
+				(pin passive line
+					(at 0 2.54 270)
+					(length 2.032)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -2.54 90)
+					(length 2.032)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Snes:74HC175"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -3315,10 +3471,28 @@
 		)
 	)
 	(junction
-		(at 97.79 90.17)
+		(at 43.18 125.73)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "f0fd7884-c5b3-4884-bf60-8587f00e629f")
+		(uuid "5c5d4b7d-348e-4946-8ad2-3ae9f57884ae")
+	)
+	(junction
+		(at 223.52 26.67)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "7ea75529-c722-4c42-a872-c1d412810d2e")
+	)
+	(junction
+		(at 259.08 25.4)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "9462868e-2493-4e72-a585-81ccce095bf3")
+	)
+	(junction
+		(at 162.56 24.13)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ef27a750-3c4b-426d-8b5a-2502eb196bcd")
 	)
 	(no_connect
 		(at 269.24 44.45)
@@ -3354,6 +3528,36 @@
 	)
 	(wire
 		(pts
+			(xy 266.7 24.13) (xy 266.7 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "023839fe-7b13-43dd-8ecf-39e8bd256ef6")
+	)
+	(wire
+		(pts
+			(xy 223.52 26.67) (xy 223.52 27.94)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1765bbcd-ebda-495d-adf8-9d9ac180b29b")
+	)
+	(wire
+		(pts
+			(xy 162.56 24.13) (xy 162.56 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1e662807-b856-4db6-b32b-32a8cadaba8f")
+	)
+	(wire
+		(pts
 			(xy 100.33 90.17) (xy 97.79 90.17)
 		)
 		(stroke
@@ -3361,6 +3565,46 @@
 			(type default)
 		)
 		(uuid "27ef0930-5e5d-467a-a5e1-dc3c168ac9b1")
+	)
+	(wire
+		(pts
+			(xy 43.18 125.73) (xy 43.18 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4b2049f4-1602-4075-812a-a44862cbe3fa")
+	)
+	(wire
+		(pts
+			(xy 228.6 26.67) (xy 223.52 26.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "665066d7-82d1-45d4-a87b-1fe11b17ff65")
+	)
+	(wire
+		(pts
+			(xy 46.99 125.73) (xy 43.18 125.73)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "70c7ad6f-1f11-4912-8186-cfb57957824e")
+	)
+	(wire
+		(pts
+			(xy 259.08 25.4) (xy 259.08 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8b5d5bc0-d708-4e21-9609-7dc299f31653")
 	)
 	(wire
 		(pts
@@ -3382,53 +3626,55 @@
 		)
 		(uuid "ad01aed2-2e6e-4480-bac6-bd5060e7b9b2")
 	)
-	(global_label "PPU2_5V_EXT"
-		(shape passive)
-		(at 78.74 24.13 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
+	(wire
+		(pts
+			(xy 46.99 124.46) (xy 46.99 125.73)
 		)
-		(uuid "50fb5559-6191-4a0a-9452-7c49b98bf063")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 78.74 18.6653 90)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
+		(stroke
+			(width 0)
+			(type default)
 		)
+		(uuid "ce7bcedd-2be2-472f-9451-a53e037679ce")
 	)
-	(global_label "PPU2_5V_EXT"
-		(shape passive)
-		(at 95.25 90.17 270)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
+	(wire
+		(pts
+			(xy 167.64 20.32) (xy 167.64 24.13)
 		)
-		(uuid "a2f36fda-b776-40e4-a71d-362724f83abd")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 95.25 95.6347 270)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
+		(stroke
+			(width 0)
+			(type default)
 		)
+		(uuid "e1e8a93e-7072-40bc-a91f-e2fdb1e4e892")
+	)
+	(wire
+		(pts
+			(xy 167.64 24.13) (xy 162.56 24.13)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e92be428-e944-4b02-a905-08b423d098dd")
+	)
+	(wire
+		(pts
+			(xy 266.7 25.4) (xy 259.08 25.4)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f6aed2e5-e021-4153-b2e6-94353ddb5ddf")
+	)
+	(wire
+		(pts
+			(xy 228.6 25.4) (xy 228.6 26.67)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fb6be2b4-1704-441c-87c9-77d99b1b7b5d")
 	)
 	(global_label "BRT0"
 		(shape output)
@@ -4027,6 +4273,30 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
+			)
+		)
+	)
+	(global_label "PPU2_5V_EXT"
+		(shape passive)
+		(at 78.74 24.13 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "50fb5559-6191-4a0a-9452-7c49b98bf063")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 78.74 18.6653 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
 		)
 	)
@@ -4747,6 +5017,30 @@
 					(size 1.27 1.27)
 				)
 				(justify right)
+			)
+		)
+	)
+	(global_label "PPU2_5V_EXT"
+		(shape passive)
+		(at 95.25 90.17 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "a2f36fda-b776-40e4-a71d-362724f83abd")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 95.25 95.6347 270)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
 		)
 	)
@@ -5701,7 +5995,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 259.08 29.21 0)
+		(at 266.7 24.13 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -5712,7 +6006,7 @@
 		(fields_autoplaced yes)
 		(uuid "10ce0280-c99b-4835-adc9-0a4be79aa1e8")
 		(property "Reference" "#PWR012"
-			(at 259.08 33.02 0)
+			(at 266.7 27.94 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5723,7 +6017,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 259.08 24.13 0)
+			(at 266.7 19.05 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -5733,7 +6027,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 259.08 29.21 0)
+			(at 266.7 24.13 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5744,7 +6038,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 259.08 29.21 0)
+			(at 266.7 24.13 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5755,7 +6049,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 259.08 29.21 0)
+			(at 266.7 24.13 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6136,7 +6430,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 162.56 29.21 0)
+		(at 167.64 20.32 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6147,7 +6441,7 @@
 		(fields_autoplaced yes)
 		(uuid "34e14a6e-d006-423a-88d3-5bde9859e8bd")
 		(property "Reference" "#PWR013"
-			(at 162.56 33.02 0)
+			(at 167.64 24.13 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6158,7 +6452,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 162.56 24.13 0)
+			(at 167.64 15.24 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6168,7 +6462,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 162.56 29.21 0)
+			(at 167.64 20.32 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6179,7 +6473,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 162.56 29.21 0)
+			(at 167.64 20.32 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6190,7 +6484,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 162.56 29.21 0)
+			(at 167.64 20.32 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6257,7 +6551,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.ti.com/lit/gpn/SN74HC175"
 			(at 259.08 45.72 0)
 			(hide yes)
 			(show_name no)
@@ -6269,6 +6563,138 @@
 			)
 		)
 		(property "Description" "Quad D-type flip-flop with clear"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer Part" "SN74HC175PWR"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SN74HC175PWR"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "LCSC"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier Part" "C2682067"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C2682067"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C2682067"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part #" "C2682067"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "JLCPCB Part #" "C2682067"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "JLCPCB Part Type" "Extended"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part Name" "SN74HC175PWR"
+			(at 259.08 45.72 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier URL" "https://www.lcsc.com/product-detail/C2682067.html"
 			(at 259.08 45.72 0)
 			(hide yes)
 			(show_name no)
@@ -6359,7 +6785,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "74HC4078"
+		(property "Value" "CD4078B"
 			(at 164.7033 29.21 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6381,7 +6807,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "https://www.ti.com/lit/gpn/CD4078B"
 			(at 162.56 44.45 0)
 			(hide yes)
 			(show_name no)
@@ -6393,6 +6819,149 @@
 			)
 		)
 		(property "Description" "8-input OR/NOR gate"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer Part" "CD4078BPWR"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "CD4078BPWR"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "LCSC"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier Part" "C2682016"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C2682016"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C2682016"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part #" "C2682016"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "JLCPCB Part #" "C2682016"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "JLCPCB Part Type" "Extended"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part Name" "CD4078BPWR"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier URL" "https://www.lcsc.com/product-detail/C2682016.html"
+			(at 162.56 44.45 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sourcing Note" "Pin-compatible TSSOP-14 LCSC/JLC 8-input OR/NOR candidate; 4000B family, slower than 74HC4078."
 			(at 162.56 44.45 0)
 			(hide yes)
 			(show_name no)
@@ -6449,6 +7018,84 @@
 			(project "snes_fpc"
 				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
 					(reference "U2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 38.1 125.73 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3ee9157d-f4b9-4563-9b00-65b579d9138d")
+		(property "Reference" "#PWR01"
+			(at 38.1 132.08 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 38.1 130.81 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 38.1 125.73 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 38.1 125.73 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 38.1 125.73 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "f118af7f-f4c4-4c99-9f0b-6d56154f84bf")
+		)
+		(instances
+			(project "snes_fpc"
+				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
+					(reference "#PWR01")
 					(unit 1)
 				)
 			)
@@ -6535,7 +7182,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 223.52 27.94 0)
+		(at 228.6 25.4 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6546,7 +7193,7 @@
 		(fields_autoplaced yes)
 		(uuid "50992025-b6d6-4ed2-84ec-919fe8bc0598")
 		(property "Reference" "#PWR0101"
-			(at 223.52 31.75 0)
+			(at 228.6 29.21 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6557,7 +7204,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 223.52 22.86 0)
+			(at 228.6 20.32 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6567,7 +7214,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 223.52 27.94 0)
+			(at 228.6 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6578,7 +7225,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 223.52 27.94 0)
+			(at 228.6 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6589,7 +7236,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 223.52 27.94 0)
+			(at 228.6 25.4 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6653,7 +7300,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf"
+		(property "Datasheet" "https://www.ti.com/lit/gpn/SN74AHC1G08"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -6665,6 +7312,138 @@
 			)
 		)
 		(property "Description" "Single AND Gate, Low-Voltage CMOS"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer Part" "SN74AHC1G08DBVR"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SN74AHC1G08DBVR"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "LCSC"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier Part" "C7467"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C7467"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C7467"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part #" "C7467"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "JLCPCB Part #" "C7467"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "JLCPCB Part Type" "Extended"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part Name" "SN74AHC1G08DBVR"
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier URL" "https://www.lcsc.com/product-detail/Gates_Texas-Instruments_C7467.html"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -6701,7 +7480,7 @@
 	)
 	(symbol
 		(lib_id "power:+5V")
-		(at 43.18 127 0)
+		(at 46.99 124.46 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6712,7 +7491,7 @@
 		(fields_autoplaced yes)
 		(uuid "550d2ae9-19f2-4c41-9abc-4baa34da5e5b")
 		(property "Reference" "#PWR07"
-			(at 43.18 130.81 0)
+			(at 46.99 128.27 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6723,7 +7502,7 @@
 			)
 		)
 		(property "Value" "+5V"
-			(at 43.18 121.92 0)
+			(at 46.99 119.38 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6733,7 +7512,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 43.18 127 0)
+			(at 46.99 124.46 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6744,7 +7523,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 43.18 127 0)
+			(at 46.99 124.46 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6755,7 +7534,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 43.18 127 0)
+			(at 46.99 124.46 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6772,6 +7551,246 @@
 			(project "snes_fpc"
 				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
 					(reference "#PWR07")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Small_US")
+		(at 256.54 25.4 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "62dbf598-c112-48a0-b501-e4ef3b2b29fe")
+		(property "Reference" "C4"
+			(at 256.667 19.05 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "C_Small_US"
+			(at 256.667 21.59 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 256.54 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 256.54 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "capacitor, small US symbol"
+			(at 256.54 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "7f787f24-12e9-43fd-8d2f-e5fe437ab2a3")
+		)
+		(pin "1"
+			(uuid "009fdb10-60f2-43b2-88ba-72c43836ed31")
+		)
+		(instances
+			(project "snes_fpc"
+				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
+					(reference "C4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Small_US")
+		(at 160.02 24.13 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6639ab3f-cbd2-4322-8844-cafe43a6da4d")
+		(property "Reference" "C2"
+			(at 160.147 17.78 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "C_Small_US"
+			(at 160.147 20.32 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 160.02 24.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 160.02 24.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "capacitor, small US symbol"
+			(at 160.02 24.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "976d1720-1471-43a4-a9eb-3dc4dbc41534")
+		)
+		(pin "1"
+			(uuid "f7abc47a-dbd6-4aee-a8c1-9273bd679f18")
+		)
+		(instances
+			(project "snes_fpc"
+				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
+					(reference "C2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Small_US")
+		(at 40.64 125.73 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6c0eabc9-fb17-481c-84c8-507369bd28d0")
+		(property "Reference" "C1"
+			(at 40.767 119.38 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "C_Small_US"
+			(at 40.767 121.92 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 40.64 125.73 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 40.64 125.73 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "capacitor, small US symbol"
+			(at 40.64 125.73 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "50ded6bf-b8e8-4f40-8f41-f10c2ca23fbe")
+		)
+		(pin "1"
+			(uuid "ba3c5932-a3bd-48fb-a658-eb4d3a4a9b53")
+		)
+		(instances
+			(project "snes_fpc"
+				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
+					(reference "C1")
 					(unit 1)
 				)
 			)
@@ -7150,7 +8169,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf"
+		(property "Datasheet" "https://www.ti.com/lit/gpn/SN74AHC1G08"
 			(at 43.18 137.16 0)
 			(hide yes)
 			(show_name no)
@@ -7162,6 +8181,138 @@
 			)
 		)
 		(property "Description" "Single AND Gate, Low-Voltage CMOS"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer Part" "SN74AHC1G08DBVR"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SN74AHC1G08DBVR"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier" "LCSC"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier Part" "C7467"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C7467"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part" "C7467"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part #" "C7467"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "JLCPCB Part #" "C7467"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "JLCPCB Part Type" "Extended"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC Part Name" "SN74AHC1G08DBVR"
+			(at 43.18 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Supplier URL" "https://www.lcsc.com/product-detail/Gates_Texas-Instruments_C7467.html"
 			(at 43.18 137.16 0)
 			(hide yes)
 			(show_name no)
@@ -7348,6 +8499,84 @@
 			(project "snes_fpc"
 				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
 					(reference "#PWR06")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 157.48 24.13 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "acab30a5-e835-4dfc-b5e9-dea268fd33d3")
+		(property "Reference" "#PWR014"
+			(at 157.48 30.48 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 157.48 29.21 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 157.48 24.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 157.48 24.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 157.48 24.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "51ada80f-095a-4c2f-b733-2705785b9d47")
+		)
+		(instances
+			(project "snes_fpc"
+				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
+					(reference "#PWR014")
 					(unit 1)
 				)
 			)
@@ -7586,6 +8815,242 @@
 			(project "snes_fpc"
 				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
 					(reference "#PWR03")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 218.44 26.67 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "d81f9256-1300-4e49-9c22-f3c45a9c2086")
+		(property "Reference" "#PWR015"
+			(at 218.44 33.02 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 218.44 31.75 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 218.44 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 218.44 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 218.44 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "d0abf971-6a6d-4528-bf2c-873f9989dba6")
+		)
+		(instances
+			(project "snes_fpc"
+				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
+					(reference "#PWR015")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C_Small_US")
+		(at 220.98 26.67 90)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "eca97731-10ed-44f8-bf25-3f8f79eb4f8e")
+		(property "Reference" "C3"
+			(at 221.107 20.32 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "C_Small_US"
+			(at 221.107 22.86 90)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 220.98 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 220.98 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "capacitor, small US symbol"
+			(at 220.98 26.67 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "2"
+			(uuid "900e9747-0fd1-4942-9e6d-304b4b0994a7")
+		)
+		(pin "1"
+			(uuid "7f21e60b-9656-438b-90ad-d1a450483365")
+		)
+		(instances
+			(project "snes_fpc"
+				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
+					(reference "C3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 254 25.4 0)
+		(unit 1)
+		(body_style 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "fd7b564f-391c-46f9-a14e-ffa268ce481b")
+		(property "Reference" "#PWR016"
+			(at 254 31.75 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "GND"
+			(at 254 30.48 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 254 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" ""
+			(at 254 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 254 25.4 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(pin "1"
+			(uuid "2863ff76-2a68-4567-ba56-f1cd0e92c77f")
+		)
+		(instances
+			(project "snes_fpc"
+				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
+					(reference "#PWR016")
 					(unit 1)
 				)
 			)

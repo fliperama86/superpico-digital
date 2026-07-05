@@ -21,3 +21,5 @@ tmp
 **/*-backups/
 **/.history/
 **/*.bak
+hardware/snes_fpc/production/
+hardware/snes_fpc/**.lck
