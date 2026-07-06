@@ -287,3 +287,62 @@
 ## 2026-07-05 21:49 -03
 - Capacitor sourcing correction for assembly: JLCPCB parts library shows Samsung CL05B104KO5NNNC, JLC/LCSC C1525, as Basic, 0402, 100 nF 16 V X7R ±10%, with large JLC assembly stock. This is the preferred PCBA choice for C1-C4 if using JLC assembly.
 - Caveat: LCSC retail page for C1525 shows out of stock, but JLCPCB PCBA library still shows Basic and in stock. For separate purchasing use C60474/C5448791 as backups; for JLC assembly prefer C1525.
+
+## 2026-07-06 12:00 -03
+- Checked whether newer NeoPico-HD audio recovery changes were ported back. Result: only older baseline patterns are present in SuperPico (init order, LUT/capture style, I2S base capture, audio pipeline shape).
+- Not yet ported: NeoPico `NEOPICO_EXP_AUDIO_STARTUP_REARM`, `NEOPICO_EXP_AUDIO_FRAME_RESYNC`, `NEOPICO_EXP_AUDIO_REARM_ON_VIDEO_REACQUIRE`, and `NEOPICO_EXP_FIRST_BOOT_REBOOT` style cold-boot workaround.
+- SuperPico currently has its own S-DSP `/RESET` handling in `src/audio/audio_pipeline.c`, but no generic audio rearm/rewarm state and no frame-resync I2S PIO variant.
+
+## 2026-07-06 12:06 -03
+- Checked OSD backport status from NeoPico-HD. SuperPico currently only has a small `src/osd/osd.c` + `font_8x8.h` framebuffer/text helper compiled in, but it is not initialized from `main.c`, not composited by `video_pipeline.c`, and has no button/menu state machine.
+- Not ported from NeoPico-HD: `fast_osd`, `menu_diag_experiment`, self-test layout, button handling, root menu, resolution menu/confirmation, runtime telemetry pages, and video-pipeline OSD compositing paths.
+- Current SuperPico OSD code is effectively unused/dead until `osd_init` is called and scanline compositing is added.
+
+## 2026-07-06 19:15 -03
+- User requested porting all relevant NeoPico-HD changes, including OSD, not only audio recovery.
+- Ported SuperPico OSD stack: added `fast_osd`, SuperPico root menu, status page, SNES self-test layout, GP25/GP26 active-low OSD buttons, and 2x scanline OSD compositing. Left old `osd.c/osd.h` as unused scaffold; CMake now builds `fast_osd` path.
+- Ported NeoPico audio recovery pieces: startup rearm/rewarm state, per-frame I2S LRCK resync PIO variant, DMA buffer clear on I2S start, audio diagnostics, and video-gap reacquire rearm request. Fixed repeated DMA channel claiming by making audio hardware init one-time.
+- `ENABLE_AUDIO_STARTUP_REARM`, `ENABLE_AUDIO_FRAME_RESYNC`, `ENABLE_AUDIO_REARM_ON_VIDEO_REACQUIRE`, `ENABLE_OSD`, and `ENABLE_OSD_BOOT_OPEN` are now in `src/config.h`.
+- Validation: `cmake --build build -j$(sysctl -n hw.ncpu)` passes, `git diff --check` passes. Link initially overflowed SCRATCH_X; fixed by moving Core 1 background audio task out of scratch_x and OSD overlay helper to scratch_y.
+- Not ported yet: NeoPico runtime resolution switching/confirmation, genlock telemetry, settings flash persistence, and cold-boot auto-reboot, because SuperPico currently uses the fixed `video_output.h` path rather than NeoPico's runtime video-mode pipeline.
+
+## 2026-07-06 19:20 -03
+- Built and flashed `build/src/superpico-digital.uf2` after OSD/audio backport. `cmake --build build -j$(sysctl -n hw.ncpu)` passed. `pi flash build/src/superpico-digital.uf2` succeeded, rebooted the RP2350 via USB serial into BOOTSEL, loaded firmware, then rebooted to app mode.
+
+## 2026-07-06 19:23 -03
+- Regression reported after OSD/audio backport flash: pressing the OSD menu button breaks the image and sync. Likely caused by OSD rendering/compositing work disturbing Core 1 HDMI timing, especially full `fast_osd_clear`/render on button edge or OSD overlay cost in scanline callback.
+- Need fix OSD to avoid heavy framebuffer updates in active video/timing-critical path. Treat previous OSD integration as unsafe until validated on hardware.
+
+## 2026-07-06 19:29 -03
+- Checked NeoPico-style non-flash/copy-to-RAM mode after OSD sync regression. SuperPico build was NOT using it: flags showed `PICO_COPY_TO_RAM=0`; NeoPico build cache has `NEOPICO_COPY_TO_RAM=ON` and applies `pico_set_binary_type(neopico_hd copy_to_ram)`.
+- Enabled SuperPico target-level copy-to-RAM with `SUPERPICO_COPY_TO_RAM=ON` and `pico_set_binary_type(superpico-digital copy_to_ram)`. Rebuilt successfully; target flags now show `PICO_COPY_TO_RAM=1` even though the global cache variable remains OFF.
+- Also changed first OSD MENU press to reveal a pre-rendered root menu instead of clearing/rendering the full OSD framebuffer live, and changed scanline OSD composition to avoid drawing underlying video below OSD spans.
+
+## 2026-07-06 19:31 -03
+- Flashed the OSD sync-regression fix build: SuperPico now uses target-level copy-to-RAM (`PICO_COPY_TO_RAM=1` in target flags), pre-renders root menu before HDMI starts, and uses cheaper OSD scanline compositing. `pi flash build/src/superpico-digital.uf2` succeeded and rebooted to app mode.
+
+## 2026-07-06 19:45 -03
+- User reported Chrono Trigger start menu/title "clock" animation is broken on current firmware. Treat CT as a PPU edge-case stress test: SNESdev lists CT uncommon graphics use on title/menu, and current firmware still ignores `PIXEL_VALID`/`OVER` and BRT0-BRT3 brightness lines.
+- Likely triage: geometry/missing/clipped/garbage clock pixels point first at Mode 7 `/OVER`/DVE/`PIXEL_VALID` handling; fade/brightness-only problems point at missing `$2100` brightness correction. Need avoid assuming this is an OSD/copy-to-RAM regression until isolated against another Mode 7 screen.
+
+## 2026-07-06 19:50 -03
+- User asked where the resolution menu is. Confirmed current SuperPico OSD root menu only has Status and Self Test. NeoPico runtime resolution switching/confirmation was explicitly not ported yet because SuperPico still uses fixed `pico_hdmi/video_output.h` rather than NeoPico runtime video-mode pipeline.
+
+## 2026-07-06 20:08 -03
+- Ported NeoPico-HD-style RT HDMI backend to SuperPico: `PICO_HDMI_RUNTIME_MODES=ON`, RT runtime attrs on, 480p uses HSTX div2 with 252 MHz sysclk, 240p uses 126 MHz, 720p uses 372 MHz and VREG 1.30 V. Did not modify `lib/`.
+- Added OSD Resolution menu with 240p/480p/720p entries, current-mode marker, BACK cycling, MENU apply, watchdog reboot-based switching, 10 s keep/revert confirmation, and flash-backed persisted resolution in the last flash sector.
+- Updated SuperPico scanline path for RT modes: 480p 2x, 240p 4x, 720p 3x centered, with OSD scaled in the same 320x240 canvas. Audio Data Islands now use `hstx_di_queue_get_hsync_active()` so 720p back-porch DI placement matches RT mode.
+- Validation: `cmake --build build -j$(sysctl -n hw.ncpu)` passes; `git diff --check` passes. Archive contains `video_output_rt.c.o`; stale object files from previous build remain in the CMake object dir but are not in `libpico_hdmi.a`.
+
+## 2026-07-06 20:12 -03
+- Flashed RT/resolution-menu build with `pi flash build/src/superpico-digital.uf2`. Tool rebooted RP2350 USB serial into BOOTSEL, loaded firmware to flash, then rebooted to application mode successfully.
+
+## 2026-07-06 20:18 -03
+- User reported 240p renders black while audio still works. Interpretation: HDMI/RT link is alive and Data Islands/audio are accepted, so likely 240p active video/metadata issue rather than total mode failure.
+- Applied likely NeoPico-HD quirk fix: set `PICO_HDMI_LEGACY_240P_AVI_INFOFRAME=1` on `pico_hdmi` so 240p uses legacy VIC-0 / PR=0 metadata. This matches NeoPico's documented stable 240p path for scalers that black out with newer PR=3 metadata. Rebuilt successfully and `git diff --check` passed. Awaiting explicit ack before flashing.
+
+## 2026-07-06 20:20 -03
+- Flashed rebuilt legacy-240p-AVI firmware with `pi flash build/src/superpico-digital.uf2`. Tool rebooted RP2350 into BOOTSEL, loaded UF2 to flash, and rebooted into application mode successfully. Test expectation: 240p should no longer black out if the issue was scaler rejection of PR=3 AVI metadata.
+
+## 2026-07-06 20:24 -03
+- User requested commit and push after validating/flashing the RT resolution-menu work. Commit scope should include the OSD/audio backport, RT HDMI mode selection, resolution menu, settings persistence, legacy 240p AVI metadata, and scratchbook notes. No `lib/` source changes were made.

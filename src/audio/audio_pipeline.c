@@ -14,7 +14,7 @@
 #include "pico/stdlib.h"
 #include "pico_hdmi/hstx_data_island_queue.h"
 #include "pico_hdmi/hstx_packet.h"
-#include "pico_hdmi/video_output.h"
+#include "pico_hdmi/video_output_rt.h"
 
 #include "audio_buffer.h"
 #include "audio_common.h"
@@ -27,6 +27,10 @@
 
 #include <string.h>
 
+#ifndef ENABLE_AUDIO_STARTUP_REARM
+#define ENABLE_AUDIO_STARTUP_REARM 0
+#endif
+
 #define PROCESS_BUFFER_SIZE 64
 
 // State machine — matches neopico-hd's pattern
@@ -34,6 +38,8 @@ enum {
     AUDIO_STATE_WAIT_HSTX,  // Wait for HSTX to stabilize
     AUDIO_STATE_INIT,       // Initialize PIO + DMA
     AUDIO_STATE_WARM,       // Capture running, output muted
+    AUDIO_STATE_REARM,      // Hard restart I2S PIO/DMA after clocks settle
+    AUDIO_STATE_REWARM,     // Capture running, output muted after rearm
     AUDIO_STATE_RUNNING,    // Normal operation
     AUDIO_STATE_RESET,      // S-DSP /RESET asserted — pipeline stopped
 };
@@ -61,9 +67,18 @@ static struct {
 
     uint32_t samples_output;
     bool initialized;
+    bool hw_initialized;
+    volatile bool rearm_requested;
+    uint32_t rearm_count;
+    uint32_t reset_count;
 } g_pipeline;
 
 static const audio_sample_t audio_silence[4] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
+
+static inline bool audio_di_hsync_active(void)
+{
+    return hstx_di_queue_get_hsync_active();
+}
 
 // Rate tracking — use DCK measurement when available, fall back to drift compensation
 #define DRIFT_CHECK_INTERVAL 30  // frames (~0.5s at 60fps)
@@ -122,7 +137,7 @@ static void audio_output_callback(const audio_sample_t *samples, uint32_t count)
             int fc = hstx_packet_set_audio_samples(&packet, src, 4,
                                                    g_pipeline.audio_frame_counter);
             hstx_data_island_t island;
-            hstx_encode_data_island(&island, &packet, false, true);
+            hstx_encode_data_island(&island, &packet, false, audio_di_hsync_active());
 
             if (hstx_di_queue_push(&island)) {
                 g_pipeline.audio_frame_counter = fc;
@@ -176,8 +191,22 @@ static inline bool audio_reset_active(void)
     return !gpio_get(PIN_AUDIO_RESET);  // Active-low
 }
 
-static void audio_hw_init(void)
+static void audio_flush_processing_state(void)
 {
+    ap_ring_init(&g_pipeline.capture_ring);
+    g_pipeline.collect_count = 0;
+    g_pipeline.audio_frame_counter = 0;
+    g_pipeline.src.accumulator = 0;
+    g_pipeline.src.phase = 0;
+    g_pipeline.src.have_prev = false;
+    last_drift_frame = video_frame_count;
+}
+
+static bool audio_hw_init_once(void)
+{
+    if (g_pipeline.hw_initialized)
+        return true;
+
     ap_ring_init(&g_pipeline.capture_ring);
 
     i2s_capture_config_t cap_config = {
@@ -189,11 +218,24 @@ static void audio_hw_init(void)
     };
 
     if (!i2s_capture_init(&g_pipeline.capture, &cap_config, &g_pipeline.capture_ring))
-        return;
+        return false;
 
     // SRC: 32040 Hz (SNES S-DSP) → 48000 Hz (HDMI default)
     src_init(&g_pipeline.src, SRC_INPUT_RATE_DEFAULT, SRC_OUTPUT_RATE_DEFAULT);
     src_set_mode(&g_pipeline.src, SRC_MODE_LINEAR);
+    g_pipeline.hw_initialized = true;
+    return true;
+}
+
+static void audio_rearm_capture(void)
+{
+    if (!g_pipeline.hw_initialized)
+        return;
+
+    i2s_capture_stop(&g_pipeline.capture);
+    audio_flush_processing_state();
+    i2s_capture_start(&g_pipeline.capture);
+    g_pipeline.rearm_count++;
 }
 
 void audio_pipeline_init(void)
@@ -207,19 +249,31 @@ void audio_pipeline_init(void)
 
 // Background task — called from Core 1 via video_output_set_background_task.
 // Must return quickly to avoid starving HDMI output.
-void __scratch_x("") audio_pipeline_process(void)
+void audio_pipeline_process(void)
 {
     if (!g_pipeline.initialized)
         return;
 
     // Check /RESET in any active state
     if (g_pipeline.state >= AUDIO_STATE_INIT && audio_reset_active()) {
-        if (g_pipeline.state >= AUDIO_STATE_WARM) {
+        if (g_pipeline.state != AUDIO_STATE_RESET) {
+            g_pipeline.reset_count++;
+        }
+        if (g_pipeline.hw_initialized && g_pipeline.capture.running) {
             i2s_capture_stop(&g_pipeline.capture);
         }
         g_pipeline.output_muted = true;
         g_pipeline.collect_count = 0;
         g_pipeline.state = AUDIO_STATE_RESET;
+    }
+
+    if (g_pipeline.rearm_requested && g_pipeline.state == AUDIO_STATE_RUNNING) {
+        g_pipeline.rearm_requested = false;
+        g_pipeline.output_muted = true;
+        audio_rearm_capture();
+        g_pipeline.state_enter_frame = video_frame_count;
+        g_pipeline.state = AUDIO_STATE_REWARM;
+        return;
     }
 
     switch (g_pipeline.state) {
@@ -235,7 +289,9 @@ void __scratch_x("") audio_pipeline_process(void)
             break;
 
         case AUDIO_STATE_INIT:
-            audio_hw_init();
+            if (!audio_hw_init_once())
+                break;
+            audio_flush_processing_state();
             i2s_capture_start(&g_pipeline.capture);
             g_pipeline.state_enter_frame = video_frame_count;
             g_pipeline.state = AUDIO_STATE_WARM;
@@ -244,12 +300,27 @@ void __scratch_x("") audio_pipeline_process(void)
         case AUDIO_STATE_WARM:
             audio_do_process();
             if (video_frame_count - g_pipeline.state_enter_frame >= AUDIO_WARM_FRAMES) {
-                ap_ring_init(&g_pipeline.capture_ring);
-                g_pipeline.collect_count = 0;
-                g_pipeline.src.accumulator = 0;
-                g_pipeline.src.phase = 0;
-                g_pipeline.src.have_prev = false;
-                last_drift_frame = video_frame_count;
+#if ENABLE_AUDIO_STARTUP_REARM
+                g_pipeline.state = AUDIO_STATE_REARM;
+#else
+                audio_flush_processing_state();
+                g_pipeline.output_muted = false;
+                g_pipeline.state = AUDIO_STATE_RUNNING;
+#endif
+            }
+            break;
+
+        case AUDIO_STATE_REARM:
+            g_pipeline.output_muted = true;
+            audio_rearm_capture();
+            g_pipeline.state_enter_frame = video_frame_count;
+            g_pipeline.state = AUDIO_STATE_REWARM;
+            break;
+
+        case AUDIO_STATE_REWARM:
+            audio_do_process();
+            if (video_frame_count - g_pipeline.state_enter_frame >= AUDIO_WARM_FRAMES) {
+                audio_flush_processing_state();
                 g_pipeline.output_muted = false;
                 g_pipeline.state = AUDIO_STATE_RUNNING;
             }
@@ -266,5 +337,25 @@ void __scratch_x("") audio_pipeline_process(void)
 
 void audio_pipeline_step(void)
 {
+}
+
+void audio_pipeline_request_rearm(void)
+{
+    g_pipeline.rearm_requested = true;
+}
+
+void audio_pipeline_get_diag(audio_pipeline_diag_t *diag)
+{
+    if (!diag)
+        return;
+
+    memset(diag, 0, sizeof(*diag));
+    diag->samples_output = g_pipeline.samples_output;
+    diag->measured_rate_hz = g_pipeline.hw_initialized ? i2s_capture_get_sample_rate(&g_pipeline.capture) : 0;
+    diag->overflows = g_pipeline.hw_initialized ? g_pipeline.capture.overflows : 0;
+    diag->rearm_count = g_pipeline.rearm_count;
+    diag->reset_count = g_pipeline.reset_count;
+    diag->muted = g_pipeline.output_muted;
+    diag->running = g_pipeline.hw_initialized && g_pipeline.capture.running;
 }
 #endif

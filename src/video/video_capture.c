@@ -1,4 +1,8 @@
 #include "video_capture.h"
+#include "config.h"
+#if ENABLE_AUDIO
+#include "audio/audio_pipeline.h"
+#endif
 #include "freq_counter.h"
 #include "hardware/dma.h"
 #include "hardware/pio.h"
@@ -24,6 +28,10 @@ static pio_sm_config g_pio_config;
 static int g_dma_chan = -1;
 static uint32_t g_line_buffers[2][SNES_H_TOTAL];
 static volatile uint32_t g_frame_count = 0;
+
+#ifndef ENABLE_AUDIO_REARM_ON_VIDEO_REACQUIRE
+#define ENABLE_AUDIO_REARM_ON_VIDEO_REACQUIRE 0
+#endif
 
 // =============================================================================
 // Pixel Conversion - RGB555 to RGB565 LUT
@@ -116,6 +124,9 @@ void video_capture_init(uint32_t height) {
 }
 
 void video_capture_run(void) {
+#if ENABLE_AUDIO && ENABLE_AUDIO_REARM_ON_VIDEO_REACQUIRE
+  uint32_t last_frame_ms = 0;
+#endif
   while (1) {
     // 1. Detect VSync Falling Edge (Active Video Start) in C
     while (!gpio_get(PIN_SNES_VBLANK))
@@ -124,6 +135,15 @@ void video_capture_run(void) {
       tight_loop_contents(); // Wait for Active Video
 
     g_frame_count++;
+#if ENABLE_AUDIO && ENABLE_AUDIO_REARM_ON_VIDEO_REACQUIRE
+    {
+      const uint32_t now_ms = to_ms_since_boot(get_absolute_time());
+      if (last_frame_ms != 0 && (now_ms - last_frame_ms) > 250U) {
+        audio_pipeline_request_rearm();
+      }
+      last_frame_ms = now_ms;
+    }
+#endif
     if (g_frame_count % 60 == 0) {
       gpio_xor_mask(1ul << PICO_DEFAULT_LED_PIN);
     }

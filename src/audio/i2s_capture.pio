@@ -55,6 +55,43 @@ left_loop:
     wait 0 pin 1                ; Wait for LRCK Low (next frame)
 .wrap
 
+; Per-frame LRCK re-sync variant.
+; Same output format as i2s_capture: RIGHT word first, then LEFT word.
+; Each stereo frame starts by waiting for a fresh LRCK high-to-low transition,
+; so a brief BCLK/LRCK glitch cannot leave capture permanently mis-framed.
+
+.program i2s_capture_frame_resync
+
+    ; Stall until BCLK is toggling
+    wait 0 pin 2
+    wait 1 pin 2
+
+.wrap_target
+    ; RIGHT channel starts on LRCK falling edge
+    wait 1 pin 1
+    wait 0 pin 1
+
+    set x, 23
+frame_resync_right_loop:
+    wait 0 pin 2
+    wait 1 pin 2
+    nop
+    in pins, 1
+    jmp x-- frame_resync_right_loop
+    push noblock
+
+    ; LEFT channel
+    wait 1 pin 1
+    set x, 23
+frame_resync_left_loop:
+    wait 0 pin 2
+    wait 1 pin 2
+    nop
+    in pins, 1
+    jmp x-- frame_resync_left_loop
+    push noblock
+.wrap
+
 % c-sdk {
 #include "hardware/gpio.h"
 
@@ -68,6 +105,24 @@ static inline void i2s_capture_program_init(PIO pio, uint sm, uint offset, uint 
     sm_config_set_in_shift(&c, false, false, 32);
 
     // Join FIFOs for 8-word RX depth
+    sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
+
+    pio_gpio_init(pio, pin_dat);
+    pio_gpio_init(pio, pin_bck);
+    pio_gpio_init(pio, pin_ws);
+
+    pio_sm_set_pindirs_with_mask64(pio, sm, 0,
+        (1ull << pin_dat) | (1ull << pin_bck) | (1ull << pin_ws));
+
+    sm_config_set_clkdiv(&c, 1.0f);
+    pio_sm_init(pio, sm, offset, &c);
+}
+
+static inline void i2s_capture_frame_resync_program_init(PIO pio, uint sm, uint offset, uint pin_dat, uint pin_ws, uint pin_bck) {
+    pio_sm_config c = i2s_capture_frame_resync_program_get_default_config(offset);
+
+    sm_config_set_in_pins(&c, pin_dat);
+    sm_config_set_in_shift(&c, false, false, 32);
     sm_config_set_fifo_join(&c, PIO_FIFO_JOIN_RX);
 
     pio_gpio_init(pio, pin_dat);

@@ -79,4 +79,10 @@
 #define PIN_AUDIO_DCK    6  // GP6  - S-DSP Pin 78 (master clock, 8.192 MHz)
 #define PIN_AUDIO_RESET  7  // GP7  - S-DSP Pin 47 (/RESET, active-low)
 
+// =============================================================================
+// OSD Buttons - GP25-26
+// =============================================================================
+#define PIN_OSD_BTN_MENU 25 // Active-low menu/select button
+#define PIN_OSD_BTN_BACK 26 // Active-low back/cycle button
+
 #endif // SNES_PINS_H

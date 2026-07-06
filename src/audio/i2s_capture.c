@@ -7,6 +7,7 @@
 
 #include "i2s_capture.h"
 
+#include "config.h"
 #include "pico/time.h"
 
 #include "hardware/dma.h"
@@ -15,6 +16,14 @@
 #include <string.h>
 
 #include "i2s_capture.pio.h"
+
+#ifndef ENABLE_AUDIO_FRAME_RESYNC
+#define ENABLE_AUDIO_FRAME_RESYNC 0
+#endif
+
+#ifndef ENABLE_AUDIO_INACTIVITY_RESTART
+#define ENABLE_AUDIO_INACTIVITY_RESTART 0
+#endif
 
 // DMA buffer must be large enough to hold samples between polls
 // At 32 kHz and 60 fps: ~1067 words/frame. Use 4096 for headroom.
@@ -61,12 +70,19 @@ bool i2s_capture_init(i2s_capture_t *cap, const i2s_capture_config_t *config, ap
     pio_set_gpio_base(config->pio, 0);
 
     // Add PIO program
+#if ENABLE_AUDIO_FRAME_RESYNC
+    uint offset = pio_add_program(config->pio, &i2s_capture_frame_resync_program);
+    cap->pio_offset = offset;
+    i2s_capture_frame_resync_program_init(config->pio, config->sm, offset,
+                                          config->pin_dat, config->pin_ws, config->pin_bck);
+#else
     uint offset = pio_add_program(config->pio, &i2s_capture_program);
     cap->pio_offset = offset;
 
     // Initialize PIO state machine
     i2s_capture_program_init(config->pio, config->sm, offset,
                              config->pin_dat, config->pin_ws, config->pin_bck);
+#endif
 
     // Configure DMA
     dma_channel_config c = dma_channel_get_default_config(cap->dma_chan);
@@ -107,6 +123,9 @@ void i2s_capture_start(i2s_capture_t *cap)
 
     // Jump to the start of the program (the sync preamble)
     pio_sm_exec(cap->config.pio, cap->config.sm, pio_encode_jmp(cap->pio_offset));
+
+    // Clear DMA buffer to avoid consuming stale words after a rearm.
+    memset(cap->dma_buffer, 0, I2S_DMA_BUFFER_SIZE * sizeof(uint32_t));
 
     // Start DMA
     dma_channel_set_write_addr(cap->dma_chan, cap->dma_buffer, true);
@@ -172,6 +191,16 @@ uint32_t i2s_capture_poll(i2s_capture_t *cap)
             }
         }
     }
+#if ENABLE_AUDIO_INACTIVITY_RESTART
+    else {
+        if (now - cap->last_activity_time > 200000) {
+            i2s_capture_stop(cap);
+            i2s_capture_start(cap);
+            cap->last_activity_time = now;
+            return 0;
+        }
+    }
+#endif
 
     // Update sample rate measurement
     uint64_t elapsed = now - cap->last_measure_time;

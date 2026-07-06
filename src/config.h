@@ -1,7 +1,22 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-// Global Feature Flags
+// Global feature flags
 #define ENABLE_AUDIO 1
+#define ENABLE_OSD 1
+#define ENABLE_SELFTEST 1
+
+// OSD behavior
+#define ENABLE_OSD_BOOT_OPEN 0
+#define ENABLE_REBOOT_MODE_SWITCH 1
+#define ENABLE_REBOOT_MODE_SWITCH_720P 1
+#define ENABLE_OSD_RES_CONFIRM 1
+#define ENABLE_SETTINGS_FLASH 1
+
+// NeoPico-HD audio recovery ports
+#define ENABLE_AUDIO_STARTUP_REARM 1
+#define ENABLE_AUDIO_FRAME_RESYNC 1
+#define ENABLE_AUDIO_REARM_ON_VIDEO_REACQUIRE 1
+#define ENABLE_AUDIO_INACTIVITY_RESTART 0
 
 #endif // CONFIG_H
