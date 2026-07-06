@@ -264,3 +264,26 @@
 - User asked whether U2 needs to be faster than CD4078B. Inspected local schematic/docs: U2 decodes PA0-PA7 == `$00` for `$2100` brightness writes, U3 combines address match with `/PWR`, and U1 latches D0-D3 on the resulting pulse.
 - Timing judgment: CD4078B is risky for production because CD4000 delay is hundreds of ns at 5 V, while this latch depends on address decode settling around the SNES B-bus `/PWR` write edge. A missed or late latch would break brightness fades/HDMA brightness updates.
 - Better direction: use a fast HC comparator such as `SN74HC688PWR` / LCSC `C132045` (TSSOP-20, in stock, typical tpd 14 ns) tied against zero, and replace U3 with a pin-compatible SOT-23-5 OR gate so the active-low equality output and active-low `/PWR` produce the same positive clock edge.
+
+## Session Log - 2026-07-05 21:32 -03
+- User adjusted the PCB after the U2 replacement. Treated their PCB edits as source of truth and did not overwrite board routing.
+- Replaced brightness decode logic in schematic/library/docs: U2 is now SN74HC688PWR / LCSC C132045 in TSSOP-20, comparing PA0-PA7 against 0x00 with R0-R7 and /G tied to GND; U3 is now SN74AHC1G32DBVR / LCSC C7470 OR gate. U4 remains SN74AHC1G08DBVR / C7467.
+- Verified netlist: U2 P0-P7 connect to PA0-PA7, U2 pin 19 drives ADDR_MATCH_N, U3 combines ADDR_MATCH_N with PWR, and U3 output clocks U1 CP. BOM export shows U1 C2682067, U2 C132045, U3 C7470, U4 C7467.
+- Validation after user PCB edits: KiCad schematic export OK, ERC 0 errors/warnings, PCB DRC with zone refill and schematic parity reports 0 unconnected pads and 0 schematic parity issues. Remaining DRC items are only the three existing footprint mismatch warnings for U3, U4, and J2.
+- Mistake to avoid: first scripted schematic symbol insertion for 74HC688/74AHC1G32 left the schematic unloadable. Restored baseline and reapplied smaller targeted edits, then added the new symbols to Snes.kicad_sym to eliminate library warnings.
+
+## 2026-07-05 21:40 -03
+- J2 connector sourcing: J2 uses a 32-position 0.5 mm pitch right-angle top-contact FPC/FFC footprint matching TE 3-1734839-2 class.
+- Current best LCSC candidate found: Hanbo HB-FPC-05LBSJ-H2032P, LCSC C22751587, 32P 0.5 mm top-contact right-angle SMD slide-lock, in stock.
+- Backup LCSC candidate: HDGC 0.5K-HX-32PWB, LCSC C2919502, 32P 0.5 mm right-angle with double-sided contacts/top-bottom entry, in stock, but footprint/contact mechanics need checking.
+- Avoid assuming exact drop-in footprint until the LCSC/EasyEDA land pattern or datasheet is overlaid against the current KiCad TE_3-1734839-2 footprint.
+
+## 2026-07-05 21:46 -03
+- Capacitor sourcing: schematic currently has C1-C4 as 0402 `C_Small_US` with no real value/metadata. These are intended as one 100 nF decoupling cap per logic IC.
+- Best LCSC candidate found: YAGEO CC0402KRX7R7BB104, LCSC C60474, 100 nF 16 V X7R ±10% 0402, in stock. Suitable for 5 V logic decoupling.
+- Higher-voltage backup found: CCTC TCC0402X7R104K500AT, LCSC C5448791, 100 nF 50 V X7R ±10% 0402, in stock.
+- Avoid using Samsung C1525 or YAGEO C131394 right now because their LCSC pages show out of stock.
+
+## 2026-07-05 21:49 -03
+- Capacitor sourcing correction for assembly: JLCPCB parts library shows Samsung CL05B104KO5NNNC, JLC/LCSC C1525, as Basic, 0402, 100 nF 16 V X7R ±10%, with large JLC assembly stock. This is the preferred PCBA choice for C1-C4 if using JLC assembly.
+- Caveat: LCSC retail page for C1525 shows out of stock, but JLCPCB PCBA library still shows Basic and in stock. For separate purchasing use C60474/C5448791 as backups; for JLC assembly prefer C1525.

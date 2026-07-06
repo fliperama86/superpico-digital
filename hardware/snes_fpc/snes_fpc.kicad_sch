@@ -5,6 +5,725 @@
 	(uuid "236958bd-e58b-4f45-aaff-e27fb00ddd62")
 	(paper "A4")
 	(lib_symbols
+		(symbol "Snes:74AHC1G32"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at -5.08 7.62 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "74AHC1G32"
+				(at 7.62 -7.62 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.ti.com/lit/gpn/SN74AHC1G32"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Single OR Gate, Low-Voltage CMOS"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "Single Gate OR AHC CMOS"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "SOT* SG-*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "74AHC1G32_0_1"
+				(arc
+					(start -7.62 5.08)
+					(mid -5.838 0)
+					(end -7.62 -5.08)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -7.62 2.54) (xy -6.35 2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts
+						(xy -7.62 -2.54) (xy -6.35 -2.54)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(arc
+					(start 5.08 0)
+					(mid 3.202 -3.202)
+					(end 0 -5.08)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start 0 5.08)
+					(mid 3.2271 3.2271)
+					(end 5.08 0)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 5.08) (xy -7.62 5.08)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 -5.08) (xy -7.62 -5.08)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "74AHC1G32_1_1"
+				(pin input line
+					(at -15.24 2.54 0)
+					(length 7.62)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -15.24 -2.54 0)
+					(length 7.62)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -10.16 90)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 12.7 0 180)
+					(length 7.62)
+					(name ""
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 10.16 270)
+					(length 5.08)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Snes:74HC688"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "U"
+				(at -7.62 26.67 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "74HC688"
+				(at -7.62 -26.67 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" "https://www.ti.com/lit/gpn/SN74HC688"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "8-bit magnitude comparator"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "HCMOS DECOD Arith"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "DIP?20* SOIC?20* SO?20* TSSOP?20*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "74HC688_1_0"
+				(pin input inverted
+					(at -12.7 -22.86 0)
+					(length 5.08)
+					(name "G"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 22.86 0)
+					(length 5.08)
+					(name "P0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 0 0)
+					(length 5.08)
+					(name "R0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 20.32 0)
+					(length 5.08)
+					(name "P1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -2.54 0)
+					(length 5.08)
+					(name "R1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 17.78 0)
+					(length 5.08)
+					(name "P2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -5.08 0)
+					(length 5.08)
+					(name "R2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 15.24 0)
+					(length 5.08)
+					(name "P3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -7.62 0)
+					(length 5.08)
+					(name "R3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -30.48 90)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 12.7 0)
+					(length 5.08)
+					(name "P4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -10.16 0)
+					(length 5.08)
+					(name "R4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 10.16 0)
+					(length 5.08)
+					(name "P5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "13"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -12.7 0)
+					(length 5.08)
+					(name "R5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 7.62 0)
+					(length 5.08)
+					(name "P6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "15"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -15.24 0)
+					(length 5.08)
+					(name "R6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "16"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 5.08 0)
+					(length 5.08)
+					(name "P7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "17"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -17.78 0)
+					(length 5.08)
+					(name "R7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "18"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output inverted
+					(at 12.7 22.86 180)
+					(length 5.08)
+					(name "P=R"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "19"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 30.48 270)
+					(length 5.08)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "20"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "74HC688_1_1"
+				(rectangle
+					(start -7.62 25.4)
+					(end 7.62 -25.4)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "74xGxx:74AHC1G08"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -3488,12 +4207,6 @@
 		(color 0 0 0 0)
 		(uuid "9462868e-2493-4e72-a585-81ccce095bf3")
 	)
-	(junction
-		(at 162.56 24.13)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "ef27a750-3c4b-426d-8b5a-2502eb196bcd")
-	)
 	(no_connect
 		(at 269.24 44.45)
 		(uuid "011b0dc5-9f2f-41d0-a41b-77dbea3c4fb5")
@@ -3522,10 +4235,6 @@
 		(at 104.14 24.13)
 		(uuid "cb0e0eb3-5315-4afe-974f-e0b4b5c96bac")
 	)
-	(no_connect
-		(at 172.72 41.91)
-		(uuid "ecd2726f-034c-4643-8147-248b960edf95")
-	)
 	(wire
 		(pts
 			(xy 266.7 24.13) (xy 266.7 25.4)
@@ -3545,16 +4254,6 @@
 			(type default)
 		)
 		(uuid "1765bbcd-ebda-495d-adf8-9d9ac180b29b")
-	)
-	(wire
-		(pts
-			(xy 162.56 24.13) (xy 162.56 29.21)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "1e662807-b856-4db6-b32b-32a8cadaba8f")
 	)
 	(wire
 		(pts
@@ -3635,26 +4334,6 @@
 			(type default)
 		)
 		(uuid "ce7bcedd-2be2-472f-9451-a53e037679ce")
-	)
-	(wire
-		(pts
-			(xy 167.64 20.32) (xy 167.64 24.13)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e1e8a93e-7072-40bc-a91f-e2fdb1e4e892")
-	)
-	(wire
-		(pts
-			(xy 167.64 24.13) (xy 162.56 24.13)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e92be428-e944-4b02-a905-08b423d098dd")
 	)
 	(wire
 		(pts
@@ -3868,9 +4547,9 @@
 			)
 		)
 	)
-	(global_label "ADDR_MATCH"
+	(global_label "ADDR_MATCH_N"
 		(shape output)
-		(at 172.72 46.99 0)
+		(at 177.8 35.56 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -5140,7 +5819,7 @@
 			)
 		)
 	)
-	(global_label "ADDR_MATCH"
+	(global_label "ADDR_MATCH_N"
 		(shape input)
 		(at 208.28 35.56 180)
 		(fields_autoplaced yes)
@@ -6071,84 +6750,7 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:GND")
-		(at 162.56 59.69 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "23d85dc3-cd29-4d72-bf21-0e298700a8ad")
-		(property "Reference" "#PWR04"
-			(at 162.56 66.04 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "GND"
-			(at 162.56 64.77 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 162.56 59.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 162.56 59.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 162.56 59.69 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "f3160cbb-b95b-4048-bccc-be37d4bf8e51")
-		)
-		(instances
-			(project "snes_fpc"
-				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
-					(reference "#PWR04")
-					(unit 1)
-				)
-			)
-		)
-	)
+
 	(symbol
 		(lib_id "power:+5V")
 		(at 248.92 35.56 90)
@@ -6428,84 +7030,7 @@
 			)
 		)
 	)
-	(symbol
-		(lib_id "power:+5V")
-		(at 167.64 20.32 0)
-		(unit 1)
-		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(in_pos_files yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "34e14a6e-d006-423a-88d3-5bde9859e8bd")
-		(property "Reference" "#PWR013"
-			(at 167.64 24.13 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "+5V"
-			(at 167.64 15.24 0)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 167.64 20.32 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Datasheet" ""
-			(at 167.64 20.32 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"+5V\""
-			(at 167.64 20.32 0)
-			(hide yes)
-			(show_name no)
-			(do_not_autoplace no)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(pin "1"
-			(uuid "15931680-e49a-4ab5-b4a2-3d76688445c1")
-		)
-		(instances
-			(project "snes_fpc"
-				(path "/236958bd-e58b-4f45-aaff-e27fb00ddd62"
-					(reference "#PWR013")
-					(unit 1)
-				)
-			)
-		)
-	)
+
 	(symbol
 		(lib_id "Snes:74HC175")
 		(at 259.08 45.72 0)
@@ -6762,9 +7287,274 @@
 			)
 		)
 	)
+	(global_label "GND"
+		(shape passive)
+		(at 152.4 58.42 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "2ea718b5-da26-4e24-b277-edecb4bdeabd")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.4 30.48 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 152.4 60.96 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "c4c72652-f8a6-44c5-828f-31e3b87a2d3f")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.4 27.94 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 152.4 63.5 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "d17863b7-0385-48c9-a986-da67fc9a3e51")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.4 25.4 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 152.4 66.04 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "3b73fe84-d884-40ad-a880-6aeeeb59aaaf")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.4 22.86 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 152.4 68.58 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "5b608fa6-5d10-4a25-9e1f-0ebf92e8d474")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.4 20.32 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 152.4 71.12 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "d5137f11-d5d0-4ed2-accd-306d5415c5d2")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.4 17.78 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 152.4 73.66 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "7d4935fb-ba6d-435f-b701-8312eb5cbea0")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.4 15.24 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 152.4 76.2 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "1582ee07-1fa6-4aad-9c74-d5c92f19ac3e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.4 12.7 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 152.4 81.28 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "7f5d39a3-3987-4aaf-8810-feabd83deb9a")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.4 7.62 180)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+	)
+	(global_label "GND"
+		(shape passive)
+		(at 165.1 88.9 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d31a70ac-5e66-4b63-9490-51a28fabcf51")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 165.1 0 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 165.1 27.94 90)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "cc6808f1-b9ee-4921-ba12-3a520464e6c7")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 165.1 60.96 90)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+	)
+
 	(symbol
-		(lib_id "Snes:74HC4078")
-		(at 162.56 44.45 0)
+		(lib_id "Snes:74HC688")
+		(at 165.1 58.42 0)
 		(unit 1)
 		(body_style 1)
 		(exclude_from_sim no)
@@ -6775,7 +7565,7 @@
 		(fields_autoplaced yes)
 		(uuid "3e585c37-308e-4e50-a268-13f26abb76b0")
 		(property "Reference" "U2"
-			(at 164.7033 26.67 0)
+			(at 167.2433 27.94 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6785,8 +7575,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "CD4078B"
-			(at 164.7033 29.21 0)
+		(property "Value" "74HC688"
+			(at 167.2433 30.48 0)
 			(show_name no)
 			(do_not_autoplace no)
 			(effects
@@ -6796,8 +7586,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Package_SO:TSSOP-14_4.4x5mm_P0.65mm"
-			(at 162.56 44.45 0)
+		(property "Footprint" "Package_SO:TSSOP-20_4.4x6.5mm_P0.65mm"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6807,8 +7597,8 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.ti.com/lit/gpn/CD4078B"
-			(at 162.56 44.45 0)
+		(property "Datasheet" "https://www.ti.com/lit/gpn/SN74HC688"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6818,8 +7608,8 @@
 				)
 			)
 		)
-		(property "Description" "8-input OR/NOR gate"
-			(at 162.56 44.45 0)
+		(property "Description" "8-bit identity comparator"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6830,7 +7620,7 @@
 			)
 		)
 		(property "Manufacturer" "Texas Instruments"
-			(at 162.56 44.45 0)
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6840,8 +7630,8 @@
 				)
 			)
 		)
-		(property "Manufacturer Part" "CD4078BPWR"
-			(at 162.56 44.45 0)
+		(property "Manufacturer Part" "SN74HC688PWR"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6851,8 +7641,8 @@
 				)
 			)
 		)
-		(property "MPN" "CD4078BPWR"
-			(at 162.56 44.45 0)
+		(property "MPN" "SN74HC688PWR"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6863,7 +7653,7 @@
 			)
 		)
 		(property "Supplier" "LCSC"
-			(at 162.56 44.45 0)
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6873,8 +7663,8 @@
 				)
 			)
 		)
-		(property "Supplier Part" "C2682016"
-			(at 162.56 44.45 0)
+		(property "Supplier Part" "C132045"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6884,8 +7674,8 @@
 				)
 			)
 		)
-		(property "LCSC" "C2682016"
-			(at 162.56 44.45 0)
+		(property "LCSC" "C132045"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6895,8 +7685,8 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C2682016"
-			(at 162.56 44.45 0)
+		(property "LCSC Part" "C132045"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6906,8 +7696,8 @@
 				)
 			)
 		)
-		(property "LCSC Part #" "C2682016"
-			(at 162.56 44.45 0)
+		(property "LCSC Part #" "C132045"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6917,8 +7707,8 @@
 				)
 			)
 		)
-		(property "JLCPCB Part #" "C2682016"
-			(at 162.56 44.45 0)
+		(property "JLCPCB Part #" "C132045"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6929,7 +7719,7 @@
 			)
 		)
 		(property "JLCPCB Part Type" "Extended"
-			(at 162.56 44.45 0)
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6939,8 +7729,8 @@
 				)
 			)
 		)
-		(property "LCSC Part Name" "CD4078BPWR"
-			(at 162.56 44.45 0)
+		(property "LCSC Part Name" "SN74HC688PWR"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6950,8 +7740,8 @@
 				)
 			)
 		)
-		(property "Supplier URL" "https://www.lcsc.com/product-detail/C2682016.html"
-			(at 162.56 44.45 0)
+		(property "Supplier URL" "https://www.lcsc.com/product-detail/C132045.html"
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6961,8 +7751,8 @@
 				)
 			)
 		)
-		(property "Sourcing Note" "Pin-compatible TSSOP-14 LCSC/JLC 8-input OR/NOR candidate; 4000B family, slower than 74HC4078."
-			(at 162.56 44.45 0)
+		(property "Sourcing Note" "Fast HC TSSOP-20 comparator used as PA0-PA7 zero detector; R0-R7 and G tied to GND; active-low P=R feeds U3 OR gate."
+			(at 165.1 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6971,48 +7761,66 @@
 					(size 1.27 1.27)
 				)
 			)
-		)
-		(pin "4"
-			(uuid "36287483-9560-4589-8f3b-3b9dc581b819")
-		)
-		(pin "7"
-			(uuid "b2ed2bba-8f1d-4881-9817-ca98cab7d909")
-		)
-		(pin "11"
-			(uuid "e96d814b-43af-4a81-b3db-2b8e6ac747ad")
-		)
-		(pin "10"
-			(uuid "968c97fa-080f-46e1-a733-ddbe9edbdb26")
-		)
-		(pin "14"
-			(uuid "3f9f72f9-0438-4465-8e63-74bb03dc4c65")
-		)
-		(pin "13"
-			(uuid "72f4f841-7ffa-4f24-93cf-03ead43541df")
-		)
-		(pin "3"
-			(uuid "dc1dd416-804b-474d-8285-320bce38a4fb")
 		)
 		(pin "1"
-			(uuid "31ae1449-adfc-4b02-8b6f-ca1b671b89e0")
+			(uuid "476b5bd8-126a-4dcc-81aa-b908ea6996f5")
 		)
 		(pin "2"
-			(uuid "da487ae0-a6ae-4b00-b4cc-b5a0ca3f5771")
+			(uuid "d69230a1-032e-4eb8-ab24-7761318c8c4b")
 		)
-		(pin "12"
-			(uuid "da1ef33b-4873-408b-9998-dbd01c328808")
+		(pin "3"
+			(uuid "b1552311-94e9-4142-a29a-6a09af7893eb")
 		)
-		(pin "8"
-			(uuid "bb4e2d0f-955a-46b4-b76e-fd9b268f87dc")
+		(pin "4"
+			(uuid "8ae6692e-ed5d-401d-ad33-2455ede37bac")
 		)
 		(pin "5"
-			(uuid "f7710808-490f-4c8a-aad7-b663099eb348")
+			(uuid "6224223f-2210-469c-80d9-8c2d9c2cad0f")
 		)
 		(pin "6"
-			(uuid "c76e659e-4704-40ff-9998-cf3a51887bcc")
+			(uuid "a3f2fa62-d683-4e79-bd8f-01de8fd8873f")
+		)
+		(pin "7"
+			(uuid "9a662e61-46ac-4cfe-946b-f608e880a0d5")
+		)
+		(pin "8"
+			(uuid "5fae9e5d-0c38-47a7-bc98-c81c3ae53b42")
 		)
 		(pin "9"
-			(uuid "a57d3894-e6d6-479c-a4b3-d9c40c5dd2f2")
+			(uuid "dd90d480-1fd1-44ee-99ee-aada8664bb91")
+		)
+		(pin "10"
+			(uuid "9495f74d-396f-4561-9ed3-1216400a5402")
+		)
+		(pin "11"
+			(uuid "2369f040-9eed-477b-a839-4093334a76fc")
+		)
+		(pin "12"
+			(uuid "cf02448e-822d-4e91-9e0d-17764ca30dff")
+		)
+		(pin "13"
+			(uuid "9adac14d-fb81-4a02-a003-6b741fded4e3")
+		)
+		(pin "14"
+			(uuid "34fe4395-2c11-4dd3-84c1-de4cc2af0448")
+		)
+		(pin "15"
+			(uuid "b1ce5f1e-a9e9-40a3-b85b-b265c6056073")
+		)
+		(pin "16"
+			(uuid "ed4eed7b-4839-4bd0-abd7-a14867163923")
+		)
+		(pin "17"
+			(uuid "c4126ec1-a1ed-4054-8fdd-d1d46589c338")
+		)
+		(pin "18"
+			(uuid "a8ee12b3-a142-491e-9400-2f3f63a2336a")
+		)
+		(pin "19"
+			(uuid "df54045a-c5ba-45a7-8d01-fbaafe273849")
+		)
+		(pin "20"
+			(uuid "6ebef5c6-44b3-41fe-b426-7233386c3d2f")
 		)
 		(instances
 			(project "snes_fpc"
@@ -7259,7 +8067,7 @@
 		)
 	)
 	(symbol
-		(lib_id "74xGxx:74AHC1G08")
+		(lib_id "Snes:74AHC1G32")
 		(at 223.52 38.1 0)
 		(unit 1)
 		(body_style 1)
@@ -7279,7 +8087,7 @@
 				)
 			)
 		)
-		(property "Value" "74AHC1G08"
+		(property "Value" "74AHC1G32"
 			(at 231.648 30.48 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7300,7 +8108,7 @@
 				)
 			)
 		)
-		(property "Datasheet" "https://www.ti.com/lit/gpn/SN74AHC1G08"
+		(property "Datasheet" "https://www.ti.com/lit/gpn/SN74AHC1G32"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -7311,7 +8119,7 @@
 				)
 			)
 		)
-		(property "Description" "Single AND Gate, Low-Voltage CMOS"
+		(property "Description" "Single OR Gate, Low-Voltage CMOS"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -7333,7 +8141,7 @@
 				)
 			)
 		)
-		(property "Manufacturer Part" "SN74AHC1G08DBVR"
+		(property "Manufacturer Part" "SN74AHC1G32DBVR"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -7344,7 +8152,7 @@
 				)
 			)
 		)
-		(property "MPN" "SN74AHC1G08DBVR"
+		(property "MPN" "SN74AHC1G32DBVR"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -7366,7 +8174,7 @@
 				)
 			)
 		)
-		(property "Supplier Part" "C7467"
+		(property "Supplier Part" "C7470"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -7377,7 +8185,7 @@
 				)
 			)
 		)
-		(property "LCSC" "C7467"
+		(property "LCSC" "C7470"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -7388,7 +8196,7 @@
 				)
 			)
 		)
-		(property "LCSC Part" "C7467"
+		(property "LCSC Part" "C7470"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -7399,7 +8207,7 @@
 				)
 			)
 		)
-		(property "LCSC Part #" "C7467"
+		(property "LCSC Part #" "C7470"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -7410,7 +8218,7 @@
 				)
 			)
 		)
-		(property "JLCPCB Part #" "C7467"
+		(property "JLCPCB Part #" "C7470"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -7432,7 +8240,7 @@
 				)
 			)
 		)
-		(property "LCSC Part Name" "SN74AHC1G08DBVR"
+		(property "LCSC Part Name" "SN74AHC1G32DBVR"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -7443,7 +8251,7 @@
 				)
 			)
 		)
-		(property "Supplier URL" "https://www.lcsc.com/product-detail/Gates_Texas-Instruments_C7467.html"
+		(property "Supplier URL" "https://www.lcsc.com/product-detail/C7470.html"
 			(at 223.52 38.1 0)
 			(hide yes)
 			(show_name no)
@@ -7454,6 +8262,18 @@
 				)
 			)
 		)
+		(property "Sourcing Note" "OR gate used with active-low SN74HC688 equality output and active-low PWR to generate the 74HC175 positive latch clock."
+			(at 223.52 38.1 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+
 		(pin "4"
 			(uuid "a7a2268b-14aa-4923-80c5-7b57fd5b85a5")
 		)
@@ -7633,6 +8453,30 @@
 					(reference "C4")
 					(unit 1)
 				)
+			)
+		)
+	)
+	(global_label "+5V"
+		(shape passive)
+		(at 162.56 24.13 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "9143bf0c-3843-402d-b0c7-cd30ab51351d")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 162.56 24.13 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
 			)
 		)
 	)

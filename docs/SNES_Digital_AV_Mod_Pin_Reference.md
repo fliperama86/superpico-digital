@@ -436,16 +436,16 @@ Brightness detection and latching is handled entirely on the QSB daughter board,
 
 | QSB Component | Function |
 | ------------- | -------- |
-| 8-input NOR gate (PA0–PA7) | Produces `ADDR_MATCH` — HIGH only when B-bus address == `$00` |
-| AND gate (`ADDR_MATCH` + `/PWR`) | Produces `WRITE_2100` pulse when CPU writes to `$2100` |
-| 74HC175 (4-bit latch) | Clocked by `WRITE_2100`; holds D[3:0] stable on output |
+| 74HC688 comparator (PA0–PA7 vs 0x00) | Produces `ADDR_MATCH_N`, LOW only when B-bus address == `$00` |
+| OR gate (`ADDR_MATCH_N` + `/PWR`) | Produces the `$2100` latch clock pulse; output rises at write end |
+| 74HC175 (4-bit latch) | Clocked by the `$2100` write pulse; holds D[3:0] stable on output |
 
 PPU2 pins tapped:
 
 | Signal | PPU2 Pin | Notes |
 | ------ | -------- | ----- |
 | `/PWR` | 6 | CPU write strobe, active low |
-| PA0–PA7 | 17–24 | B-bus address (into NOR gate on QSB) |
+| PA0–PA7 | 17–24 | B-bus address (into 74HC688 comparator on QSB) |
 | D0 | 15 | Brightness bit 0 (LSB) |
 | D1 | 14 | Brightness bit 1 |
 | D2 | 13 | Brightness bit 2 |
@@ -601,10 +601,10 @@ See [REFERENCES.md](REFERENCES.md) for all hardware documentation sources, prior
 | D2      | 13     | INIDISP bit 2                                                                                     |
 | D3      | 12     | INIDISP bit 3 — brightness MSB                                                                    |
 | D7      | 8      | INIDISP bit 7 — force-blank; screen forced black *(optional — rarely used mid-frame in practice)* |
-| PA0–PA7 | 17–24  | B-bus address; feed into 74HC4078 NOR → ADDR_MATCH signal                                         |
+| PA0–PA7 | 17–24  | B-bus address; feed into 74HC688 zero comparator to generate `ADDR_MATCH_N`                       |
 
 
-**External ICs required (on QSB):** 74HC4078 (8-input NOR gate) wired to PA0–PA7 produces `ADDR_MATCH` (HIGH when address == `$00`). An AND gate combines `ADDR_MATCH` + `/PWR` into `WRITE_2100`. A 74HC175 (4-bit latch) clocked by `WRITE_2100` holds D[3:0] stable on its outputs. The RP2350 reads `Brightness[3:0]` at any time — no timing-critical bus snooping on the main board.
+**External ICs required (on QSB):** SN74HC688 compares PA0–PA7 against 0x00, with R0–R7 and `/G` tied to GND, producing `ADDR_MATCH_N` (LOW when address == `$00`). A 74AHC1G32 OR gate combines `ADDR_MATCH_N` + `/PWR`; its output is LOW only during a `$2100` write and rises at write end, clocking the 74HC175. The 74HC175 holds D[3:0] stable on its outputs. The RP2350 reads `Brightness[3:0]` at any time, with no timing-critical bus snooping on the main board.
 
 **Required for:** Any game using fade-to/from-black via $2100 — Super Mario World level transitions, Super Metroid fades, most title screens, etc.
 
@@ -651,9 +651,9 @@ VBLANK   ───────────────────────�
                                   ├──[AND]────────────────── PIXEL_VALID
 /OVER        (PPU1 p94) ──────────┘
 
-PA0–PA7  (PPU2 p17–24) ──[8-input NOR]──ADDR_MATCH───┐
-                                                     ├──[AND]──WRITE_2100
-/PWR     (PPU2 p6)  ─────────────────────────────────┘            │
+PA0–PA7  (PPU2 p17–24) ──[74HC688 PA==0]──ADDR_MATCH_N──┐
+                                                         ├──[OR]──WRITE_2100_CLK
+/PWR     (PPU2 p6)  ─────────────────────────────────────┘                 │
                                                                   │ (clock)
 D0–D3    (PPU2 p12–15) ───────────────────────────────[74HC175]───┴────── Brightness[3:0]
 
@@ -665,9 +665,9 @@ PALMODE  (PPU2 p30)  ───────────────────�
 
 | Operation              | Input                           | Output                | IC Required             |
 | ---------------------- | ------------------------------- | --------------------- | ----------------------- |
-| Address match          | PA0–PA7 (PPU2 pins 17–24)       | `ADDR_MATCH`          | 74HC4078 or NOR tree    |
-| Write strobe combine   | `ADDR_MATCH` + `/PWR`           | `WRITE_2100` clock    | AND gate                |
-| Brightness latch       | `WRITE_2100` clock + D0–D3      | 4 stable output lines | 74HC175 (4-bit latch)   |
+| Address match          | PA0–PA7 (PPU2 pins 17–24)       | `ADDR_MATCH_N`        | 74HC688 comparator      |
+| Write strobe combine   | `ADDR_MATCH_N` + `/PWR`         | `WRITE_2100_CLK`      | 74AHC1G32 OR gate       |
+| Brightness latch       | `WRITE_2100_CLK` + D0–D3        | 4 stable output lines | 74HC175 (4-bit latch)   |
 | Pixel validity combine | `/OVER` + `/TRANSPARENT`        | `PIXEL_VALID`         | AND gate                |
 | RGB bit reordering     | TST[4:0] per channel (reversed) | Correctly ordered RGB | PCB routing only (free) |
 
